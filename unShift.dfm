@@ -1,0 +1,224 @@
+object fmShift: TfmShift
+  Left = 627
+  Top = 386
+  Caption = #1057#1084#1077#1097#1077#1085#1080#1077' '#1091#1095#1072#1090#1082#1086#1074
+  ClientHeight = 554
+  ClientWidth = 405
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  FormStyle = fsMDIChild
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  Visible = True
+  OnClose = FormClose
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  object DBG_Shift: TDBGridEh
+    Left = 0
+    Top = 84
+    Width = 405
+    Height = 470
+    Align = alClient
+    AutoFitColWidths = True
+    ColumnDefValues.AlwaysShowEditButton = True
+    ColumnDefValues.AutoDropDown = True
+    ColumnDefValues.EndEllipsis = True
+    Ctl3D = True
+    DataSource = fmMain.dsShift
+    DefaultDrawing = False
+    DynProps = <>
+    Flat = True
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Arial'
+    Font.Style = []
+    FooterParams.Color = clWindow
+    IndicatorOptions = [gioShowRowIndicatorEh, gioShowRecNoEh]
+    Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+    OptionsEh = [dghFixed3D, dghHighlightFocus, dghClearSelection, dghRowHighlight, dghDialogFind, dghShowRecNo, dghColumnResize, dghColumnMove, dghHotTrack, dghExtendVertLines]
+    ParentCtl3D = False
+    ParentFont = False
+    PopupMenu = fmDirection.PopupMenu1
+    TabOrder = 0
+    TitleParams.MultiTitle = True
+    TitleParams.VTitleMargin = 5
+    VertScrollBar.VisibleMode = sbAlwaysShowEh
+    OnDrawColumnCell = DBG_ShiftDrawColumnCell
+    Columns = <
+      item
+        DynProps = <>
+        EditButtons = <>
+        FieldName = 'Shift_ID'
+        Footers = <>
+        Visible = False
+      end
+      item
+        DynProps = <>
+        EditButtons = <>
+        FieldName = 'Dir_Key'
+        Footers = <>
+        Visible = False
+      end
+      item
+        DynProps = <>
+        EditButtons = <>
+        FieldName = 'Shift_Name'
+        Footers = <>
+        Title.Caption = #1053#1072#1079#1074#1072#1085#1080#1077
+      end
+      item
+        DynProps = <>
+        EditButtons = <>
+        FieldName = 'Shift_Value'
+        Footers = <>
+        Title.Caption = #1040
+        Width = 75
+      end
+      item
+        DynProps = <>
+        EditButtons = <>
+        FieldName = 'Shift_Flag'
+        Footers = <>
+        Title.Caption = #1042
+        Width = 59
+      end>
+    object RowDetailData: TRowDetailPanelControlEh
+    end
+  end
+  object ToolBar5: TToolBar
+    Left = 0
+    Top = 0
+    Width = 405
+    Height = 84
+    AutoSize = True
+    ButtonHeight = 38
+    ButtonWidth = 39
+    Caption = 'ToolBar1'
+    Color = clBtnFace
+    EdgeInner = esNone
+    EdgeOuter = esNone
+    Images = fmMain.ImageList1
+    ParentColor = False
+    TabOrder = 1
+    object ToolButton12: TToolButton
+      Left = 0
+      Top = 0
+      Hint = #1057#1086#1079#1076#1072#1090#1100' '#1092#1072#1081#1083
+      AutoSize = True
+      Caption = 'ToolButton1'
+      ImageIndex = 5
+      ParentShowHint = False
+      ShowHint = True
+      OnClick = ToolButton12Click
+    end
+    object ToolButton2: TToolButton
+      Left = 39
+      Top = 0
+      Caption = 'ToolButton2'
+      ImageIndex = 11
+      OnClick = ToolButton2Click
+    end
+    object ToolButton1: TToolButton
+      Left = 0
+      Top = 0
+      Width = 8
+      Caption = 'ToolButton1'
+      ImageIndex = 6
+      Wrap = True
+      Style = tbsSeparator
+    end
+    object Label1: TLabel
+      Left = 0
+      Top = 46
+      Width = 323
+      Height = 18
+      Align = alClient
+      Alignment = taCenter
+      Caption = '     '#1050#1086#1086#1088#1076'.'#1072#1074#1090#1086#1074#1077#1076#1077#1085#1080#1103' = '#1050#1086#1086#1088#1076'.'#1050#1051#1059#1041' '#183' '#1042' + '#1040
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Layout = tlCenter
+    end
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 200
+    Top = 120
+    object N1: TMenuItem
+      Bitmap.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        1800000000000003000000000000000000000000000000000000FF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF087B3908
+        7B39087B39087B39FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FF087B3910CE8410BD6B087B39FF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF087B3918
+        D68C10CE84087B39FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FF087B39087B39087B39087B3918DE9418D68C087B39087B39087B39087B
+        39FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF087B3918EFA518EFA518E79C18
+        E79418DE9418D68C10CE8410BD6B087B39FF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FF087B3918EFA518EFA518EFA518E79C18E79418DE9418D68C10CE84087B
+        39FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF087B39087B39087B39087B3918
+        EFA518E794087B39087B39087B39087B39FF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FF087B3918EFA518E79C087B39FF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF087B3918
+        EFA518EFA5087B39FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FF087B39087B39087B39087B39FF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+      Caption = #1044#1086#1073#1072#1074#1080#1090#1100
+      ShortCut = 45
+    end
+    object N2: TMenuItem
+      Bitmap.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        1800000000000003000000000000000000000000000000000000FF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FF087B39087B39087B39087B39087B39087B39087B39087B39087B39087B
+        39FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF087B3910BD6B10BD6B10BD6B10
+        BD6B18D68C18DE9418E79418E794087B39FF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FF087B3910BD6B10BD6B10BD6B18D68C18DE9418E79418E79418E794087B
+        39FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF087B39087B39087B39087B3908
+        7B39087B39087B39087B39087B39087B39FF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+      Caption = #1059#1076#1072#1083#1080#1090#1100
+      ShortCut = 46
+    end
+    object N3: TMenuItem
+      Caption = #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100
+      ShortCut = 16451
+      Visible = False
+    end
+  end
+end

@@ -1,0 +1,1 @@
+update TEMP set ID = NULL

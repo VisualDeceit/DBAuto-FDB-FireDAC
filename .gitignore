@@ -67,3 +67,10 @@ __recovery/
 
 # Boss dependency manager vendor folder https://github.com/HashLoad/boss
 modules/
+
+# Разное
+TABL_KUIB_ULIYAN_SIZRAN/
+Files/
+update/
+firebird*
+firebird/

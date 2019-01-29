@@ -1,0 +1,3 @@
+INSERT INTO OBJECTS (dir_KEY, KOORD, OBJ_KEY)
+select (SELECT ID from directions where CODE=:VAR_CODE and ID<>:DIR_ID),
+        KOORD, OBJ_KEY FROM OBJECTS WHERE DIR_KEY = :DIR_ID

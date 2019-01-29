@@ -1,0 +1,563 @@
+unit unLimits;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, DB, DBTables, ExtCtrls, DBCtrls, Grids, DBGrids,
+  DBGridEhGrouping, GridsEh, DBGridEh, Menus, StdCtrls,ShellAPI, ImgList,
+  ComCtrls, ToolWin, ComObj, ToolCtrlsEh, DBGridEhToolCtrls, DynVarsEh,
+  EhLibVCL, DBAxisGridsEh, XMLIntf, XMLDoc;
+
+type
+  TfmLimits = class(TForm)
+    ToolBar5: TToolBar;
+    ToolButton12: TToolButton;
+    ToolButton13: TToolButton;
+    DBG_Limits: TDBGridEh;
+    pmLimits: TPopupMenu;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    ToolButton1: TToolButton;
+    ToolButton2: TToolButton;
+    ToolButton3: TToolButton;
+    pmImport: TPopupMenu;
+    DB1: TMenuItem;
+    N3: TMenuItem;
+    ImportDialog: TOpenDialog;
+    procedure DBG_LimitsDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumnEh; State: TGridDrawState);
+    procedure N1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure ToolButton12Click(Sender: TObject);
+    procedure ToolButton13Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure DBG_LimitsGetCellParams(Sender: TObject; Column: TColumnEh;
+      AFont: TFont; var Background: TColor; State: TGridDrawState);
+    procedure ToolButton2Click(Sender: TObject);
+    procedure ToolButton3Click(Sender: TObject);
+    procedure DB1Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmLimits: TfmLimits;
+
+implementation
+
+uses  unMain, unVars, unDirection, unShiftSet, unImport;
+
+{$R *.dfm}
+
+procedure TfmLimits.DBG_LimitsDrawColumnCell(Sender: TObject;
+  const Rect: TRect; DataCol: Integer; Column: TColumnEh;
+  State: TGridDrawState);
+begin
+  if fmMain.IBDS_Limits.FieldByName('Note').AsString='Перегон' then
+  Canvas.Brush.Color:=clRed;
+  DBG_Limits.DefaultDrawColumnCell(Rect,DataCol,Column,State);
+end;
+
+procedure TfmLimits.N1Click(Sender: TObject);
+begin
+ fmMain.IBDS_Limits.Insert; 
+end;
+
+procedure TfmLimits.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+      LDocument: IXMLDocument;
+        LNodeRoot, LNodeChild, LNode: IXMLNode;
+begin
+  try
+    LDocument := TXMLDocument.Create(nil);
+    LDocument.LoadFromFile(extractfilepath(application.ExeName)+'Setup.xml');
+    LDocument.Active:=true;
+    LNodeRoot := LDocument.ChildNodes.FindNode('Setup');
+
+    LNodeChild:= LNodeRoot.ChildNodes.FindNode('Windows');
+    LNode:=LNodeChild.ChildNodes.FindNode('Limits');
+    LimSettings.width:=fmLimits.width;
+    LimSettings.Height:=fmLimits.height;
+    LimSettings.Left:=fmLimits.left;
+    LimSettings.Top:=fmLimits.top;
+    LNode.SetAttribute('visible',LimSettings.visible);
+    LNode.SetAttribute('height', fmLimits.height);
+    LNode.SetAttribute('width',  fmLimits.width);
+    LNode.SetAttribute('left',   fmLimits.left);
+    LNode.SetAttribute('top',    fmLimits.top);
+
+    LDocument.SaveToFile(extractfilepath(application.ExeName)+'Setup.xml');
+    LDocument.Active:=false;
+  finally
+
+  end;
+  Action:=caFree;
+  fmMain.tbLimits.Down:=False;
+  if  fmMain.IBDS_Limits.State in [dsEdit] then fmMain.IBDS_Limits.Post;
+end;
+
+
+procedure TfmLimits.ToolButton12Click(Sender: TObject);
+var
+  i:Word;
+  r_count:word;
+  dir:Byte;
+  put:byte;
+  file_name:string;
+  str:string;
+  deb_txt:TextFile;
+  mes,SQL_Str :string;
+label L1;
+begin
+ try
+  with fmMain.IBQR_TEMP do
+  begin
+   Close;
+   SQL.Clear;
+   SQL.LoadFromFile(SQL_DIR+'L_Select.sql');
+   ParamByName('DIR_ID').AsInteger:=fmMain.IBDS_DirectionsID.Value;
+   if not fl_Shift then  SQL.Add('ORDER BY L.beg_km, L.beg_pk') else SQL.Add('ORDER BY LIN_KOORD') ;
+   fmMain.IBTR_TEMP.StartTransaction;
+   Open;
+   Last;
+   First;
+   r_count:=fmMain.IBQR_TEMP.RecordCount;
+   if r_count=0 then
+   begin
+    Application.MessageBox('Данные для создания файла ограничений остутствуют!','Ошибка', MB_OK+ MB_ICONSTOP + MB_TOPMOST);
+    if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
+    Exit;
+    end;
+   end ;
+   dir:=fmMain.IBDS_Directions.FieldValues['Code'];
+   put:=fmMain.IBDS_Directions.FieldValues['WAY'];
+   file_name:='';
+   if dir<10  then file_name:='0'+IntToStr(dir) else  file_name:=IntToStr(dir);
+   file_name:=file_name+'p'+inttostr(put);
+   str:=extractfilepath(application.ExeName)+'files\'+
+                             IntToStr(fmMain.IBDS_Directions.FieldValues['Code'])+' '+
+                             fmMain.IBDS_Directions.FieldValues['FName'];
+   if not DirectoryExists(str) then  CreateDir(str);
+   for i:=1 to r_count do
+    begin
+     if not fl_Shift then
+     begin
+       ogP[i].kB:=fmMain.IBQR_TEMP.FieldValues['beg_km'];
+       ogP[i].pB:=fmMain.IBQR_TEMP.FieldValues['beg_pk'];
+       ogP[i].kE:=fmMain.IBQR_TEMP.FieldValues['end_km'];
+       ogP[i].pE:=fmMain.IBQR_TEMP.FieldValues['end_pk'];
+       ogP[i].V:= fmMain.IBQR_TEMP.FieldValues['Speed'];
+     end else
+     begin
+       ogP[i].kB:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_KM'];
+       ogP[i].pB:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_PK'];
+       ogP[i].kE:=fmMain.IBQR_TEMP.FieldValues['LIN_END_KM'];
+       ogP[i].pE:=fmMain.IBQR_TEMP.FieldValues['LIN_END_PK'];
+       ogP[i].V:=fmMain.IBQR_TEMP.FieldValues['Speed'];
+     end;
+     //проверка ограничений
+     if i>1 then
+     begin
+        if  (ogP[i].kB*10+ogP[i].pB>=ogP[i-1].kE*10+ogP[i-1].pE+2) or
+            (ogP[i].kB*10+ogP[i].pB<=ogP[i-1].kE*10+ogP[i-1].pE)
+            then
+        begin
+         Application.MessageBox(PChar('Невозможно создать файл ограничений. Ошибка в строке № '+inttostr(i)+'.'), 'Ошибка', MB_OK
+          + MB_ICONSTOP + MB_TOPMOST);
+         if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
+         exit;
+        end;
+     end;
+     if i<> r_count then fmMain.IBQR_TEMP.Next;
+    end;
+   fmMain.IBTR_TEMP.Commit;
+   if FileExists(str+'\'+file_name+'.ogr')=True then
+   begin
+     mes:='Папка уже содержит файл "'+file_name+'.ogr".'+#13+#13+
+        'Заменить имеющийся файл'+#13+#13+
+        '   '+IntToStr(GetFileSize(str+'\'+file_name+'.ogr'))+ ' Байт'+#13+
+        '   Дата изменения: '+GetFileDate(str+'\'+file_name+'.ogr')+#13+#13+
+        'новым файлом?';
+    if Application.MessageBox(PWideChar(mes),
+     'Подтверждение замены файла', MB_YESNO + MB_ICONQUESTION + MB_TOPMOST) = IDYES then
+    begin
+L1:
+    assignfile(fogp,str+'\'+file_name+'.ogr');
+     AssignFile(deb_txt,str+'\'+file_name+'.ogr.txt');
+     rewrite(fogp);
+     Rewrite(deb_txt);
+      for i:=1 to r_count do
+      begin
+       write(fogp,ogP[i]);
+       Writeln(deb_txt,ogP[i].kB:4,'  ',ogP[i].pB:2,'  ', ogP[i].kE:4,'  ',ogP[i].pE:2,'  ', ogP[i].V:3 );
+      end;
+     closefile(fogp);
+     CloseFile(deb_txt);
+      Application.MessageBox(PChar('Файл "'+file_name+'.ogr" успешно создан!'), 'Внимание!', MB_OK or MB_DEFBUTTON1 +
+      MB_ICONINFORMATION + MB_TOPMOST);
+    end;
+   end else goto L1;
+ except
+    if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
+    Application.MessageBox('Ошибка при создании файла!', 'Внимание!', MB_OK or MB_DEFBUTTON1 +
+    MB_ICONSTOP + MB_TOPMOST);
+ end;
+end;
+
+procedure TfmLimits.ToolButton13Click(Sender: TObject);
+begin
+  if Application.MessageBox('Вы дейтсвительно хотите полностью очистить таблицу ограничений?',
+    'Очистка таблицы', MB_YESNO + MB_ICONWARNING + MB_TOPMOST) = IDYES then
+  begin
+    DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
+      with fmMain.IBSQL do
+      begin
+       Close;
+       SQL.Clear;
+       SQL.Add('Delete FROM LIMITS WHERE Dir_key='+DIR_ID);
+       fmMain.IBTR_WRITE.StartTransaction;
+       ExecQuery;
+       fmMain.IBTR_WRITE.Commit;
+       end;
+     DS_Refresh(fmMain.IBDS_Limits);
+  end;
+end;
+
+procedure TfmLimits.N2Click(Sender: TObject);
+begin
+ fmMain.IBDS_Limits.Delete;
+end;
+
+procedure TfmLimits.FormDestroy(Sender: TObject);
+begin
+ fmLimits:=nil;
+end;
+
+procedure TfmLimits.DBG_LimitsGetCellParams(Sender: TObject;
+  Column: TColumnEh; AFont: TFont; var Background: TColor;
+  State: TGridDrawState);
+begin
+ if fmMain.IBDS_Limits.FieldByName('Note').AsString='Перегон' then
+  Background:=$00BFFFC1;
+end;
+
+
+procedure TfmLimits.ToolButton2Click(Sender: TObject);
+begin
+ Shift_source:=2;
+ fmShiftSet.ShowModal;
+end;
+
+//экспорт таблицы в отдельную базу формата .*db
+procedure TfmLimits.ToolButton3Click(Sender: TObject);
+var
+  i:Word;
+  r_count:word;
+  dir:Byte;
+  put:byte;
+  file_name:string;
+  str:string;
+  deb_txt:TextFile;
+  mes,SQL_Str :string;
+  ExpTable: TTable;
+begin
+   dir:=fmMain.IBDS_Directions.FieldValues['Code'];
+   put:=fmMain.IBDS_Directions.FieldValues['WAY'];
+   file_name:='';
+   if dir<10  then file_name:='0'+IntToStr(dir) else  file_name:=IntToStr(dir);
+   file_name:=file_name+'p'+inttostr(put);
+   str:=extractfilepath(application.ExeName)+'files\'+
+                             IntToStr(fmMain.IBDS_Directions.FieldValues['Code'])+' '+
+                             fmMain.IBDS_Directions.FieldValues['FName'];
+  if not DirectoryExists(str) then  CreateDir(str);
+  ExpTable:=TTable.Create(self);
+  with ExpTable do
+  begin
+   Active := False;
+   DatabaseName := str+'\';
+   TableType := ttParadox;
+   TableName := fmMain.IBDS_Directions.FieldValues['FNAME']+'_p'+inttostr(put)+'_OGR';
+    {Создаем поля:}
+    with FieldDefs do begin
+      Clear;
+      with AddFieldDef do begin
+          Name := 'Номер';
+          DataType := ftWord;
+      end; //with
+      with AddFieldDef do begin
+          Name := 'Название_станц';
+          DataType := ftString;
+          Size := 30;
+      end; //with
+      with AddFieldDef do begin
+          Name := 'Нач_км';
+          DataType := ftWord;
+      end; //with
+      with AddFieldDef do begin
+          Name := 'Нач_пик';
+          DataType := ftWord;
+      end; //with
+      with AddFieldDef do begin
+          Name := 'Кон_км';
+          DataType := ftWord;
+      end; //with
+      with AddFieldDef do begin
+          Name := 'Кон_пик';
+          DataType := ftWord;
+      end; //with
+      with AddFieldDef do begin
+          Name := 'Огранич_км/ч';
+          DataType := ftWord;
+      end; //with
+    end; //with
+
+    //создаем таблицу:
+   CreateTable;
+    //и открываем ее:
+   Open;
+  end;
+ try
+    DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
+    with fmMain.IBQR_TEMP do
+    begin
+     Close;
+     SQL.Clear;
+     SQL.LoadFromFile(SQL_DIR+'L_Select.sql');
+     ParamByName('DIR_ID').AsInteger:=fmMain.IBDS_DirectionsID.Value;
+     if not fl_Shift then  SQL.Add('ORDER BY L.beg_km, L.beg_pk') else SQL.Add('ORDER BY LIN_KOORD') ;
+     fmMain.IBTR_TEMP.StartTransaction;
+     Open;
+     Last;
+     First;
+     r_count:=fmMain.IBQR_TEMP.RecordCount;
+     if r_count=0 then
+     begin
+      Application.MessageBox('Данные для экспорта остутствуют!','Ошибка', MB_OK+ MB_ICONSTOP + MB_TOPMOST);
+      if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Commit; 
+      Exit;
+      end;
+      last;
+    end ;
+    for i:=r_count downto 1  do
+    begin
+     ExpTable.Insert;
+     if not fl_Shift then
+     begin
+       ExpTable.FieldValues['Нач_км']:=fmMain.IBQR_TEMP.FieldValues['beg_km'];
+       ExpTable.FieldValues['Нач_пик']:=fmMain.IBQR_TEMP.FieldValues['beg_pk'];
+       ExpTable.FieldValues['Кон_км']:=fmMain.IBQR_TEMP.FieldValues['end_km'];
+       ExpTable.FieldValues['Кон_пик']:=fmMain.IBQR_TEMP.FieldValues['end_pk'];
+       ExpTable.FieldValues['Огранич_км/ч']:=fmMain.IBQR_TEMP.FieldValues['Speed'];
+     end else
+     begin
+       ExpTable.FieldValues['Нач_км']:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_KM'];
+       ExpTable.FieldValues['Нач_пик']:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_PK'];
+       ExpTable.FieldValues['Кон_км']:=fmMain.IBQR_TEMP.FieldValues['LIN_END_KM'];
+       ExpTable.FieldValues['Кон_пик']:=fmMain.IBQR_TEMP.FieldValues['LIN_END_PK'];
+     end;
+     ExpTable.FieldValues['Номер']:=i;
+     ExpTable.FieldValues['Огранич_км/ч']:=fmMain.IBQR_TEMP.FieldValues['Speed'];
+     ExpTable.Post;
+     if i<> 1 then fmMain.IBQR_TEMP.Prior;
+    end;
+    ExpTable.Close;
+    ExpTable.Free;
+    fmMain.IBTR_TEMP.Commit;
+    Application.MessageBox(Pchar('Файл "'+ExpTable.TableName+'.db" успешно создан!'), 'Внимание!', MB_OK or MB_DEFBUTTON1 +
+    MB_ICONINFORMATION + MB_TOPMOST);
+ except
+    if fmMain.IBTR_TEMP.intransaction then fmMain.IBTR_TEMP.Rollback;
+     Application.MessageBox('Ошибка при создании файла!', 'Внимание!', MB_OK or MB_DEFBUTTON1 +
+    MB_ICONSTOP + MB_TOPMOST);
+ end;
+end;
+
+//Импорт  данных из другой таблицы
+var impDBpath,impDBname:string;
+procedure TfmLimits.DB1Click(Sender: TObject);
+var
+i:word; s:string;
+qtimport: TQuery;
+begin
+ DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
+ if (fmMain.OpenDialog1.Execute) and (DIR_ID<>null) then
+ begin
+  //определение пути и имени импортируемой БД
+  impDBpath:=fmMain.OpenDialog1.FileName;
+  s:='';
+  for i:=Length(impDBpath) downto 0 do
+  if impDBpath[i]<>'\' then s:=s+impDBpath[i] else Break;
+  Delete(impDBpath,Length(impDBpath)+1-Length(s),Length(s));
+  delete(s,1,3);
+  impDBname:='';
+  for i:=Length(s) downto 1 do impDBname:=impDBname+s[i];
+  //открытие импортируемой БД
+  try
+    qtimport:= TQuery.Create(self);
+    with qtimport do
+    begin
+     Close;
+     DatabaseName:=impDBpath;
+     Active:=false;
+     SQL.Clear;
+     SQL.Add('SELECT *');
+     SQL.Add('FROM "'+impDBname+'"');
+     Active:=true;
+    end;
+   qtimport.First;
+   fmMain.IBDS_Limits.DisableControls;
+   while not qtimport.Eof do
+   begin
+    fmMain.IBDS_Limits.Insert;
+    fmMain.IBDS_Limits.FieldByName('DIR_KEY').Value:=DIR_ID;
+    fmMain.IBDS_Limits.FieldByName('BEG_KM').Value:=qtimport.FieldValues['Нач_км'];
+    fmMain.IBDS_Limits.FieldByName('BEG_PK').Value:=qtimport.FieldValues['Нач_пик'];
+    fmMain.IBDS_Limits.FieldByName('END_KM').Value:=qtimport.FieldValues['Кон_км'];
+    fmMain.IBDS_Limits.FieldByName('END_PK').Value:=qtimport.FieldValues['Кон_пик'];
+    fmMain.IBDS_Limits.FieldByName('SPEED').Value:= qtimport.FieldValues['Огранич_км/ч'];
+    fmMain.IBDS_Limits.Post;
+    qtimport.Next;
+   end;
+   qtimport.Close;
+   qtimport.free;
+   fmMain.IBDS_Limits.EnableControls;
+   except
+     fmMain.IBDS_Limits.EnableControls;
+     if qtimport.Active then
+     begin
+      qtimport.Close;
+      qtimport.free;
+     end;
+
+    Application.MessageBox('Ошибка при импортировании данных.', 'Внимание!', MB_OK +
+      MB_ICONSTOP + MB_TOPMOST);
+    end;
+ end;
+end;
+
+//импорт их xls
+procedure TfmLimits.N3Click(Sender: TObject);
+const
+  xlCellTypeLastCell = $0000000B;
+var
+  XLApp, Sheet: OLEVariant;
+  RangeMatrix: Variant;
+  RangeMatrixFiltred: Variant;
+  koord:LongInt;
+  del:Integer;
+  x, y, k, r, z: Integer;
+  fl_add_filtr:Boolean;
+  AGrid: TStringGrid;
+  i,j:Integer;
+  ind_beg,ind_end:Integer;
+  Prep_key:Byte;
+  tmp_koord,tmp_koord1,tmp_koord0:LongInt;
+  tmp_pik,st_len:Word;
+begin
+if ImportDialog.Execute then
+ begin
+  // Create Excel-OLE Object
+  XLApp := CreateOleObject('Excel.Application');
+  AGrid:= TStringGrid.Create(Self);
+  try
+    // Hide Excel
+    XLApp.Visible := False;
+    // Open the Workbook
+    XLApp.Workbooks.Open(ImportDialog.FileName);
+    // Sheet := XLApp.Workbooks[1].WorkSheets[1];
+    Sheet := XLApp.Workbooks[ExtractFileName(ImportDialog.FileName)].WorkSheets[1];
+    // In order to know the dimension of the WorkSheet, i.e the number of rows
+    // and the number of columns, we activate the last non-empty cell of it
+    Sheet.Cells.SpecialCells(xlCellTypeLastCell, EmptyParam).Activate;
+    // Get the value of the last row
+    x := XLApp.ActiveCell.Row;
+    // Get the value of the last column
+    y := 4;//XLApp.ActiveCell.Column;
+    // Set Stringgrid's row &col dimensions.
+    AGrid.RowCount := x;
+    AGrid.ColCount := y;
+    // Assign the Variant associated with the WorkSheet to the Delphi Variant
+    RangeMatrix := XLApp.Range['A1', XLApp.Cells.Item[X, Y]].value;
+    //  Define the loop for filling in the TStringGrid
+  //  fmImport.clbFilterObjects.Items.Add(AnsiLowerCase (RangeMatrix[2, 2]));     //[строка;столбец]
+  //  fmImport.clbFilterPath.Items.Add(RangeMatrix[2, 3]);
+    k := 1;
+    repeat
+      for r := 1 to y do
+    //  if (R=2) and (K>1) then AGrid.Cells[(r - 0), (k - 1)] := AnsiLowerCase(RangeMatrix[K, R]) else
+      AGrid.Cells[(r - 0), (k - 1)] := RangeMatrix[K, R];
+      // добавляем фильтры  со второй строки, т.к. первая это заголовок
+      { if K>1 then
+      begin
+       // по объектам
+        fl_add_filtr:=true;
+        for z:=0 to  fmImport.clbFilterObjects.Count-1 do
+        if fmImport.clbFilterObjects.Items[z]=AnsiLowerCase (RangeMatrix[K, 2]) then fl_add_filtr:=False;
+        if fl_add_filtr then fmImport.clbFilterObjects.Items.Add(AnsiLowerCase(RangeMatrix[k, 2]));  }
+       {// по путям
+        fl_add_filtr:=true;
+        for z:=0 to  fmImport.clbFilterPath.Count-1 do
+        if fmImport.clbFilterPath.Items[z]=RangeMatrix[K, 3] then fl_add_filtr:=False;
+        if fl_add_filtr then fmImport.clbFilterPath.Items.Add(RangeMatrix[k, 3]);  
+      end;                                                                         }
+      Inc(k, 1);
+      AGrid.RowCount := k + 1;
+    until k > x;
+    // Unassign the Delphi Variant Matrix
+    RangeMatrix := Unassigned;
+      try
+       if (DIR_ID<>null) then
+       begin
+        for i:=0 to x-1 do
+        begin
+         begin
+          tmp_koord:=StrToInt(AGrid.Cells[1,i]);
+          tmp_koord1:=StrToInt(AGrid.Cells[2,i]);
+          with fmMain.IBDS_Limits do
+          begin
+            Insert;
+            FieldByName('BEG_KM').Value:=(tmp_koord div 1000)+1;
+            tmp_pik:=(tmp_koord mod 1000) div 100;
+            FieldByName('BEG_PK').Value:=tmp_pik+1;
+
+            FieldByName('END_KM').Value:=(tmp_koord1 div 1000)+1;
+            tmp_pik:=(tmp_koord1 mod 1000) div 100;
+            FieldByName('END_PK').Value:=tmp_pik+1;
+            FieldByName('Speed').Value:=AGrid.Cells[3,i];
+            FieldByName('Note').Value:=AGrid.Cells[4,i];
+            FieldByName('Shift_KEY').Value:=null;
+            Post;
+          end;
+         end;
+        end;
+       end;
+        Application.MessageBox('Данные успешно импортированы', 'Внимание!', MB_OK +
+        MB_ICONINFORMATION + MB_TOPMOST);
+      except
+        Application.MessageBox('Ошибка при импорте данных', 'Внимание!', MB_OK +
+          MB_ICONERROR + MB_TOPMOST);
+      end;
+
+  finally
+    // Quit Excel
+    if not VarIsEmpty(XLApp) then
+    begin
+      // XLApp.DisplayAlerts := False;
+      XLApp.Quit;
+      XLAPP := Unassigned;
+      Sheet := Unassigned;
+      AGrid.Destroy;
+    end;
+  end;
+ end;
+
+end;
+
+end.
+
+

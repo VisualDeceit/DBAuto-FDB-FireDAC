@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Setup>
+	<Reservation>
+		<Mode Value="0" Count="0"/>
+	</Reservation>
+	<Graph>
+		<Background Color="0"/>
+		<Axis LineColor="12632256" LineWidth="1" TextColor="12632256" TextHeight="12"/>
+		<Limits LineColor="255" TextColor="255" TextHeight="18" LineWidth="1"/>
+		<Stations LineColor="16777215" TextColor="16777215" TextHeight="12" LineWidth="1"/>
+		<LightSignals LineColor="65280" TextColor="65280" TextHeight="12" LineWidth="1"/>
+		<Profil Color="4227072"/>
+	</Graph>
+	<Base>
+		<Path HOST="10.0.2.189" FOLDER="D:\base\"/>
+	</Base>
+	<Update>
+		<Host Name="http://vnikti-dbauto.ru"/>
+	</Update>
+	<Windows>
+		<Stations visible="false" height="701" width="705" left="587" top="14"/>
+		<TimeTable visible="false" height="612" width="700" left="1032" top="213"/>
+		<Limits visible="false" height="876" width="624" left="1094" top="143"/>
+		<Objects visible="false" height="610" width="429" left="894" top="5"/>
+		<Signals visible="false" height="1045" width="498" left="1396" top="1"/>
+		<Directions visible="false" height="1071" width="583" left="0" top="0"/>
+		<Profile visible="false" height="615" width="429" left="719" top="14"/>
+	</Windows>
+</Setup>
