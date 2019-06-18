@@ -11,19 +11,20 @@
 		<LightSignals LineColor="65280" TextColor="65280" TextHeight="12" LineWidth="1"/>
 		<Profil Color="4227072"/>
 	</Graph>
-	<Base>
-		<Path HOST="10.0.2.189" FOLDER="D:\base\"/>
-	</Base>
+	<FB>
+		<!--Connection Protocol="TCPIP" Server="10.0.4.175" Path="D:\base\"/-->
+		<Connection Protocol="local" Server="" Path="D:\base\"/>
+	</FB>
 	<Update>
 		<Host Name="http://vnikti-dbauto.ru"/>
 	</Update>
 	<Windows>
-		<Stations visible="false" height="701" width="705" left="587" top="14"/>
+		<Stations visible="false" height="701" width="705" left="657" top="366"/>
 		<TimeTable visible="false" height="612" width="700" left="1032" top="213"/>
-		<Limits visible="false" height="876" width="624" left="1094" top="143"/>
+		<Limits visible="false" height="876" width="624" left="688" top="128"/>
 		<Objects visible="false" height="610" width="429" left="894" top="5"/>
-		<Signals visible="false" height="1045" width="498" left="1396" top="1"/>
-		<Directions visible="false" height="1071" width="583" left="0" top="0"/>
+		<Signals visible="false" height="1070" width="958" left="0" top="0"/>
+		<Directions visible="false" height="1070" width="958" left="958" top="0"/>
 		<Profile visible="false" height="615" width="429" left="719" top="14"/>
 	</Windows>
 </Setup>

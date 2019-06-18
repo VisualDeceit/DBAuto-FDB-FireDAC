@@ -55,7 +55,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = 588
-        Width = 651
+        Width = 654
       end
       item
         Break = False
@@ -64,7 +64,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = -1
-        Width = 709
+        Width = 706
       end
       item
         ImageIndex = -1
@@ -75,7 +75,7 @@ object fmMain: TfmMain
     object ToolBar1: TToolBar
       Left = 11
       Top = 0
-      Width = 638
+      Width = 641
       Height = 40
       Align = alNone
       ButtonHeight = 48
@@ -275,9 +275,9 @@ object fmMain: TfmMain
       end
     end
     object ToolBar2: TToolBar
-      Left = 666
+      Left = 669
       Top = 0
-      Width = 700
+      Width = 697
       Height = 40
       Align = alNone
       ButtonHeight = 38
@@ -329,7 +329,7 @@ object fmMain: TfmMain
     Left = 40
     Top = 72
     Bitmap = {
-      494C01012200AC00E40020002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01012200AC00040020002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000002001000001002000000000000040
       0200000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -5211,7 +5211,7 @@ object fmMain: TfmMain
     Left = 72
     Top = 72
     Bitmap = {
-      494C01011200AC00E40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01011200AC00040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -5885,7 +5885,6 @@ object fmMain: TfmMain
     Top = 128
   end
   object IBDB_Main: TIBDatabase
-    Connected = True
     DatabaseName = '10.0.2.189/gds_db:D:\BASE\BASE.fdb'
     Params.Strings = (
       'user_name=sysdba'
@@ -6807,8 +6806,7 @@ object fmMain: TfmMain
       'User_Name=sysdba'
       'Password=masterkey'
       'Database=D:\BASE\BASE.fdb'
-      'Protocol=TCPIP'
-      'Server=10.0.2.189/gds_db'
+      'Server=localhost'
       'DriverID=FB')
     FetchOptions.AssignedValues = [evAutoClose]
     FetchOptions.AutoClose = False

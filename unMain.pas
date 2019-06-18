@@ -308,7 +308,7 @@ end;
 
 procedure Init;
 var
-HOST_DB,FOLDER_DB:string;
+FD_Protocol, FB_Server, FB_Path:string;
   str:string;
   err_code:Byte;
 LDocument: IXMLDocument;
@@ -358,11 +358,12 @@ begin
            if LNode.HasAttribute('LineColor') then    cl_svet := LNode.Attributes['LineColor'];
           end;
 
-           if LNodeChild.NodeName='Base' then
+           if LNodeChild.NodeName='FB' then
           begin
-           LNode:= LNodeChild.ChildNodes.Nodes['Path'];
-           if LNode.HasAttribute('HOST') then HOST_DB := LNode.Attributes['HOST'];
-           if LNode.HasAttribute('FOLDER') then FOLDER_DB := LNode.Attributes['FOLDER'];
+           LNode:= LNodeChild.ChildNodes.Nodes['Connection'];
+           if LNode.HasAttribute('Protocol') then FD_Protocol := LNode.Attributes['Protocol'];
+           if LNode.HasAttribute('Server') then FB_Server := LNode.Attributes['Server'];
+           if LNode.HasAttribute('Path') then FB_Path := LNode.Attributes['Path'];
           end;
 
             if LNodeChild.NodeName='Update' then
@@ -438,9 +439,9 @@ begin
       Clear;
       Add('User_Name=sysdba');
       Add('Password=masterkey');
-      Add('Database='+FOLDER_DB+'BASE.FDB');
-      Add('Protocol=TCPIP');
-      Add('Server='+HOST_DB);
+      Add('Database='+FB_Path+'BASE.FDB');
+      Add('Protocol='+FD_Protocol);
+      Add('Server='+FB_Server);
       Add('DriverID=FB');
     end;
     fmMain.FDC_Base.Connected:=true;
