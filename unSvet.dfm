@@ -79,6 +79,7 @@ object fmSvet: TfmSvet
     DataSource = DS_SV
     DefaultDrawing = False
     DynProps = <>
+    EvenRowColor = clWindow
     Flat = True
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWindowText
@@ -89,7 +90,7 @@ object fmSvet: TfmSvet
     IndicatorOptions = [gioShowRowIndicatorEh, gioShowRecNoEh]
     EmptyDataInfo.Active = True
     EmptyDataInfo.Text = #1053#1077#1090' '#1076#1072#1085#1085#1099#1093
-    OddRowColor = 15397119
+    OddRowColor = clWindow
     Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
     OptionsEh = [dghFixed3D, dghHighlightFocus, dghClearSelection, dghEnterAsTab, dghRowHighlight, dghDialogFind, dghShowRecNo, dghColumnResize, dghColumnMove, dghAutoFitRowHeight, dghHotTrack, dghExtendVertLines]
     ParentCtl3D = False
@@ -103,6 +104,7 @@ object fmSvet: TfmSvet
     OnDrawColumnCell = DBG_SvetDrawColumnCell
     Columns = <
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'ID'
@@ -110,6 +112,7 @@ object fmSvet: TfmSvet
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'DIR_KEY'
@@ -117,6 +120,7 @@ object fmSvet: TfmSvet
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'FNAME'
@@ -124,6 +128,7 @@ object fmSvet: TfmSvet
         Title.Caption = #1053#1072#1079#1074#1072#1085#1080#1077
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'KOORD'
@@ -132,6 +137,7 @@ object fmSvet: TfmSvet
         Width = 108
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'SPEED'
@@ -139,6 +145,7 @@ object fmSvet: TfmSvet
         Title.Caption = #1057#1082#1086#1088#1086#1089#1090#1100
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'SHIFT_KEY'

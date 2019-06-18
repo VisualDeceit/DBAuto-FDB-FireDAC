@@ -449,7 +449,7 @@ begin
 
    importGrid:=TStringGrid.Create(fmMain);
 
-    fmMain.StatusBar1.Panels[1].Text:= GetCompName(HOST_DB)+' '+FOLDER_DB+'BASE.FDB';
+    fmMain.StatusBar1.Panels[1].Text:= GetCompName(FB_Server)+' '+FB_Path+'BASE.FDB';
   except
     Application.MessageBox('Ошибка при открытии базы данных.', 'Внимание!', MB_OK
     + MB_ICONSTOP + MB_TOPMOST);
@@ -469,7 +469,15 @@ begin
      if (update_check<>'')  then
          fmMain.TrayIcon1.BalloonHint:='Доступна новая версия программы для обновления';
    end
-  else  fmMain.TrayIcon1.BalloonHint:='Нет соединения с интернетом'
+  else  fmMain.TrayIcon1.BalloonHint:='Нет соединения с интернетом';
+
+  //папки для работы с PARADOX
+ //  if not DirectoryExists( ExtractFilePath(ParamStr(0))+ 'PRIV') then
+  //     CreateDir(PChar(ExtractFilePath(ParamStr(0))+ 'PRIV'));
+   if not DirectoryExists( ExtractFilePath(ParamStr(0))+ 'NET') then
+        CreateDir(PChar(ExtractFilePath(ParamStr(0))+ 'NET'));
+  // Session.PrivateDir := ExtractFilePath(ParamStr(0)) + 'PRIV';
+   Session.NetFileDir := ExtractFilePath(ParamStr(0)) + 'NET';
 
 end;
 

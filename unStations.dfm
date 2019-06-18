@@ -53,6 +53,7 @@ object fmStations: TfmStations
     OnDrawColumnCell = DBG_StationsDrawColumnCell
     Columns = <
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'ID'
@@ -60,6 +61,7 @@ object fmStations: TfmStations
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'DIR_KEY'
@@ -67,6 +69,7 @@ object fmStations: TfmStations
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'FNAME'
@@ -76,6 +79,7 @@ object fmStations: TfmStations
         Width = 203
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'KOORD'
@@ -85,6 +89,7 @@ object fmStations: TfmStations
         Width = 114
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'BEG_KM'
@@ -92,6 +97,7 @@ object fmStations: TfmStations
         Title.Caption = #1053#1072#1095#1072#1083#1086' || '#1050#1084
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'BEG_PK'
@@ -99,6 +105,7 @@ object fmStations: TfmStations
         Title.Caption = #1053#1072#1095#1072#1083#1086' || '#1055#1080#1082#1077#1090
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'END_KM'
@@ -106,6 +113,7 @@ object fmStations: TfmStations
         Title.Caption = #1050#1086#1085#1077#1094' || '#1050#1084
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'END_PK'
@@ -113,6 +121,7 @@ object fmStations: TfmStations
         Title.Caption = #1050#1086#1085#1077#1094' || '#1055#1080#1082#1077#1090
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'SPEED'
@@ -120,6 +129,7 @@ object fmStations: TfmStations
         Title.Caption = #1057#1082#1086#1088#1086#1089#1090#1100
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'SHIFT_KEY'
@@ -127,6 +137,7 @@ object fmStations: TfmStations
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'LIN_KOORD'
@@ -286,7 +297,6 @@ object fmStations: TfmStations
     Top = 168
   end
   object FDQ_ST: TFDQuery
-    Active = True
     AfterPost = FDQ_STAfterPost
     AfterDelete = FDQ_STAfterDelete
     CachedUpdates = True
@@ -401,7 +411,7 @@ object fmStations: TfmStations
       '  SHIFT_KEY'
       'FROM STATIONS'
       'WHERE ID = :ID')
-    Left = 596
+    Left = 604
     Top = 168
   end
   object FDT_WRITE_ST: TFDTransaction

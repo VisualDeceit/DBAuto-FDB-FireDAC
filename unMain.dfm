@@ -6102,7 +6102,7 @@ object fmMain: TfmMain
     UpdateObject = IBUPD_Stations
     DataSource = dsDirections
     Left = 256
-    Top = 240
+    Top = 288
     object IBDS_StationsID: TIntegerField
       FieldName = 'ID'
       Origin = '"STATIONS"."ID"'
@@ -6819,6 +6819,7 @@ object fmMain: TfmMain
   end
   object FDT_READ: TFDTransaction
     Options.ReadOnly = True
+    Options.AutoStart = False
     Options.AutoStop = False
     Connection = FDC_Base
     Left = 976

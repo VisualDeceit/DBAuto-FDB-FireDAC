@@ -545,10 +545,8 @@ begin
     // закрываем набор данных
     FDQ_ST.Close;
   finally
-
   end;
-
-
+ //отлипаем кнопку
  Action := caFree;
  fmMain.tbStations.Down:=False;
  if fmMain.IBDS_Stations.State in [dsEdit] then  fmMain.IBDS_Stations.Post;

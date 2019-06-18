@@ -78,7 +78,7 @@ begin
         begin
          //очищаем журнал
          FDQ_SV.CommitUpdates;
-         //замершаем транзакцию
+         //завершаем транзакцию
          FDT_WRITE_SV.Commit;
         end else
          raise Exception.Create('Ошибка при удалении записи');
@@ -106,7 +106,7 @@ begin
         begin
          //очищаем журнал
          FDQ_SV.CommitUpdates;
-         //замершаем транзакцию
+         //завершаем транзакцию
          FDT_WRITE_SV.Commit;
         end else
          raise Exception.Create('Ошибка при добавлении записи');
@@ -128,7 +128,7 @@ var
         LNodeRoot, LNodeChild, LNode: IXMLNode;
 begin
   try
-
+    //сохраняем положение окна в файл настроек
     LDocument := TXMLDocument.Create(nil);
     LDocument.LoadFromFile(extractfilepath(application.ExeName)+'Setup.xml');
     LDocument.Active:=true;
@@ -178,6 +178,7 @@ begin
   finally
   end;
  Action:=caFree;
+ fmMain.tbSvet.Down:=False;
 end;
 
 //создание файла
@@ -325,8 +326,20 @@ begin
      SQL.Add('FROM "'+impDBname+'"');
      Active:=true;
     end;
-   qtimport.First;
+  except
+   on E: Exception do
+     begin
+     if qtimport.Active then  qtimport.Close;
+     qtimport.free;
+     Application.MessageBox(PWideChar('Ошибка при открытии файла *.DB:'+#13+#13+E.Message),
+                                'Редактор базы данных автоведения',
+                                MB_OK + MB_ICONERROR);
+     exit;
+    end;
+   end;
 
+  qtimport.First;
+  //импорт данных в таблицу
     with FDCmd do
     begin
      Close;
@@ -346,25 +359,21 @@ begin
         FDT_WRITE_SV.Commit;
         qtimport.Next;
       except
-        on E: EFDDBEngineException do
+        on E: Exception do
         begin
              if FDT_WRITE_SV.Active then FDT_WRITE_SV.Rollback;
-             Application.ShowException(E);
+             Application.MessageBox(PWideChar('Ошибка при импорте файла:'+#13+#13+E.Message),
+                                'Редактор базы данных автоведения',
+                                MB_OK + MB_ICONERROR);
+         if qtimport.Active then  qtimport.Close;
+         qtimport.free;
+         exit;
         end;
       end;
     end;
    qtimport.Close;
    qtimport.free;
    FDQ_SV.Refresh;
-  except
-    if qtimport.Active then
-     begin
-      qtimport.Close;
-      qtimport.free;
-      end;
-    Application.MessageBox('Ошибка при импортировании данных.', 'Внимание!', MB_OK +
-      MB_ICONSTOP + MB_TOPMOST);
-    end;
  end;
 end;
 

@@ -23,8 +23,8 @@
 		<TimeTable visible="false" height="612" width="700" left="1032" top="213"/>
 		<Limits visible="false" height="876" width="624" left="688" top="128"/>
 		<Objects visible="false" height="610" width="429" left="894" top="5"/>
-		<Signals visible="false" height="1070" width="958" left="0" top="0"/>
-		<Directions visible="false" height="1070" width="958" left="958" top="0"/>
+		<Signals visible="false" height="1053" width="587" left="1286" top="16"/>
+		<Directions visible="false" height="1063" width="545" left="7" top="7"/>
 		<Profile visible="false" height="615" width="429" left="719" top="14"/>
 	</Windows>
 </Setup>
