@@ -294,7 +294,7 @@ begin
  fmSvet:=nil;
 end;
 
-//Импорт  данных из другой таблицы *.DB
+//Импорт  данных из таблицы *.DB
 procedure TfmSvet.ToolButton1Click(Sender: TObject);
 var
   qtimport: TQuery;
