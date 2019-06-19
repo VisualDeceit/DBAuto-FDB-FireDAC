@@ -270,6 +270,7 @@ var
  procedure DS_Refresh(ADS: TDataSet; const AShowHourGlass: Boolean = True);
  procedure DS_Refresh_All;
  procedure Init;
+ function OpenParadoxDB(impDBpath: string; form: TComponent): TQuery;
 
 
 implementation
@@ -306,6 +307,51 @@ try
 
 end;
 
+// открытие БД PARADOX для импорта
+function OpenParadoxDB(impDBpath: string; form: TComponent): TQuery;
+var
+  i:word; s: string;
+  impDBname:string;
+begin
+
+  //определение пути и имени импортируемой БД
+  s:='';
+  for i:=Length(impDBpath) downto 0 do
+  if impDBpath[i]<>'\' then s:=s+impDBpath[i] else Break;
+  Delete(impDBpath,Length(impDBpath)+1-Length(s),Length(s));
+  delete(s,1,3);
+  impDBname:='';
+  for i:=Length(s) downto 1 do impDBname:=impDBname+s[i];
+
+  //открытие импортируемой БД
+  try
+   result:= TQuery.Create(form);
+    with result do
+    begin
+     Close;
+     DatabaseName:=impDBpath;
+     Active:=false;
+     SQL.Clear;
+     SQL.Add('SELECT *');
+     SQL.Add('FROM "'+impDBname+'"');
+     Active:=true;
+    end;
+  except
+   on E: Exception do
+     begin
+     if result.Active then  result.Close;
+     result.Destroy;
+     Application.MessageBox(PWideChar('Ошибка при открытии файла '+impDBname+'.DB:'+#13+#13+E.Message),
+                                'Редактор базы данных автоведения',
+                                MB_OK + MB_ICONERROR);
+     result:= nil;
+     exit;
+    end;
+   end;
+end;
+
+
+// инициализация программы
 procedure Init;
 var
 FD_Protocol, FB_Server, FB_Path:string;
@@ -472,11 +518,8 @@ begin
   else  fmMain.TrayIcon1.BalloonHint:='Нет соединения с интернетом';
 
   //папки для работы с PARADOX
- //  if not DirectoryExists( ExtractFilePath(ParamStr(0))+ 'PRIV') then
-  //     CreateDir(PChar(ExtractFilePath(ParamStr(0))+ 'PRIV'));
    if not DirectoryExists( ExtractFilePath(ParamStr(0))+ 'NET') then
         CreateDir(PChar(ExtractFilePath(ParamStr(0))+ 'NET'));
-  // Session.PrivateDir := ExtractFilePath(ParamStr(0)) + 'PRIV';
    Session.NetFileDir := ExtractFilePath(ParamStr(0)) + 'NET';
 
 end;

@@ -55,7 +55,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = 588
-        Width = 654
+        Width = 657
       end
       item
         Break = False
@@ -64,7 +64,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = -1
-        Width = 706
+        Width = 703
       end
       item
         ImageIndex = -1
@@ -75,7 +75,7 @@ object fmMain: TfmMain
     object ToolBar1: TToolBar
       Left = 11
       Top = 0
-      Width = 641
+      Width = 644
       Height = 40
       Align = alNone
       ButtonHeight = 48
@@ -275,9 +275,9 @@ object fmMain: TfmMain
       end
     end
     object ToolBar2: TToolBar
-      Left = 669
+      Left = 672
       Top = 0
-      Width = 697
+      Width = 694
       Height = 40
       Align = alNone
       ButtonHeight = 38

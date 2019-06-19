@@ -429,7 +429,7 @@ object fmStations: TfmStations
     FetchOptions.AssignedValues = [evItems]
     FetchOptions.Items = [fiBlobs, fiDetails]
     UpdateOptions.AssignedValues = [uvEDelete, uvEInsert, uvEUpdate]
-    Left = 452
-    Top = 232
+    Left = 460
+    Top = 224
   end
 end

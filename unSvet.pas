@@ -86,7 +86,7 @@ begin
           on E: Exception do
           begin
             if FDT_WRITE_SV.Active then FDT_WRITE_SV.Rollback;
-            FDQ_SV.CommitUpdates;
+            FDQ_SV.CancelUpdates;
             FDQ_SV.Refresh;
             Application.ShowException(E);
           end;
@@ -114,7 +114,7 @@ begin
           on E: Exception do
           begin
             if FDT_WRITE_SV.Active then FDT_WRITE_SV.Rollback;
-            FDQ_SV.CommitUpdates;
+            FDQ_SV.CancelUpdates;
             FDQ_SV.Refresh;
             Application.ShowException(E);
           end;
@@ -167,7 +167,7 @@ begin
           on E: Exception do
           begin
             if FDT_WRITE_SV.Active then FDT_WRITE_SV.Rollback;
-            FDQ_SV.CommitUpdates;
+            FDQ_SV.CancelUpdates;
             FDQ_SV.Refresh;
             Application.ShowException(E);
           end;
@@ -295,61 +295,29 @@ begin
 end;
 
 //Импорт  данных из другой таблицы *.DB
-var impDBpath,impDBname:string;
 procedure TfmSvet.ToolButton1Click(Sender: TObject);
 var
-  i:word; s:string;
-   qtimport: TQuery;
+  qtimport: TQuery;
 begin
  DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
  if (fmMain.OpenDialog1.Execute) and (DIR_ID<>null) then
  begin
-  //определение пути и имени импортируемой БД
-  impDBpath:=fmMain.OpenDialog1.FileName;
-  s:='';
-  for i:=Length(impDBpath) downto 0 do
-  if impDBpath[i]<>'\' then s:=s+impDBpath[i] else Break;
-  Delete(impDBpath,Length(impDBpath)+1-Length(s),Length(s));
-  delete(s,1,3);
-  impDBname:='';
-  for i:=Length(s) downto 1 do impDBname:=impDBname+s[i];
-  //открытие импортируемой БД
-  try
-   qtimport:= TQuery.Create(self);
-    with qtimport do
-    begin
-     Close;
-     DatabaseName:=impDBpath;
-     Active:=false;
-     SQL.Clear;
-     SQL.Add('SELECT *');
-     SQL.Add('FROM "'+impDBname+'"');
-     Active:=true;
-    end;
-  except
-   on E: Exception do
-     begin
-     if qtimport.Active then  qtimport.Close;
-     qtimport.free;
-     Application.MessageBox(PWideChar('Ошибка при открытии файла *.DB:'+#13+#13+E.Message),
-                                'Редактор базы данных автоведения',
-                                MB_OK + MB_ICONERROR);
-     exit;
-    end;
-   end;
-
+  //открытие таблицы PARADOX
+  qtimport := OpenParadoxDB(fmMain.OpenDialog1.FileName, self);
+  if qtimport = nil then exit;
   qtimport.First;
+
   //импорт данных в таблицу
+    try
     with FDCmd do
-    begin
-     Close;
-     CommandText.Clear;
-     CommandText.Add('INSERT INTO LIGHT_SIGNALS (Dir_key, Koord, FName, Speed)');
-     CommandText.Add('VALUES (:new_Dir_key, :new_Koord, :new_FName, :new_Speed)');
-    end;
+     begin
+      Close;
+      CommandText.Clear;
+      CommandText.LoadFromFile(SQL_DIR+'LS_Import.sql');
+     end;
+
     while not qtimport.Eof do
-    begin
-      try
+      begin
         FDT_WRITE_SV.StartTransaction;
         FDCmd.ParamByName('new_Dir_key').Value:=DIR_ID;
         FDCmd.ParamByName('new_Koord').Value:=qtimport.FieldValues['Координата'];
@@ -358,19 +326,20 @@ begin
         FDCmd.Execute();
         FDT_WRITE_SV.Commit;
         qtimport.Next;
-      except
-        on E: Exception do
-        begin
-             if FDT_WRITE_SV.Active then FDT_WRITE_SV.Rollback;
-             Application.MessageBox(PWideChar('Ошибка при импорте файла:'+#13+#13+E.Message),
-                                'Редактор базы данных автоведения',
-                                MB_OK + MB_ICONERROR);
-         if qtimport.Active then  qtimport.Close;
-         qtimport.free;
-         exit;
-        end;
       end;
+   except
+    on E: Exception do
+    begin
+         if FDT_WRITE_SV.Active then FDT_WRITE_SV.Rollback;
+         Application.MessageBox(PWideChar('Ошибка при импорте файла:'+#13+#13+E.Message),
+                            'Редактор базы данных автоведения',
+                            MB_OK + MB_ICONERROR);
+     if qtimport.Active then  qtimport.Close;
+     qtimport.free;
+     exit;
     end;
+   end;
+
    qtimport.Close;
    qtimport.free;
    FDQ_SV.Refresh;

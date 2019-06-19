@@ -54,8 +54,6 @@ type
       State: TGridDrawState);
     procedure N2Click(Sender: TObject);
     procedure ToolButton2Click(Sender: TObject);
-    procedure ToolButton1MouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ToolButton3Click(Sender: TObject);
@@ -412,17 +410,12 @@ end;
 
 
 //правой клавишией
-procedure TfmStations.ToolButton1MouseDown(Sender: TObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-//  if Button=mbRight then fmstationExport.ShowModal;
-end;
-
 procedure TfmStations.FormDestroy(Sender: TObject);
 begin
  fmStations:=nil;
 end;
 
+//после удаления
 procedure TfmStations.FDQ_STAfterDelete(DataSet: TDataSet);
 begin
 if FDQ_ST.UpdatesPending then
@@ -443,7 +436,7 @@ if FDQ_ST.UpdatesPending then
           on E: Exception do
           begin
             if FDT_WRITE_ST.Active then FDT_WRITE_ST.Rollback;
-            FDQ_ST.CommitUpdates;
+            FDQ_ST.CancelUpdates;
             FDQ_ST.Refresh;
             Application.ShowException(E);
           end;
@@ -483,7 +476,7 @@ if FDQ_ST.UpdatesPending then
           on E: Exception do
           begin
             if FDT_WRITE_ST.Active then FDT_WRITE_ST.Rollback;
-            FDQ_ST.CommitUpdates;
+            FDQ_ST.CancelUpdates;
             FDQ_ST.Refresh;
             Application.ShowException(E);
           end;
@@ -536,7 +529,7 @@ begin
           on E: Exception do
           begin
             if FDT_WRITE_ST.Active then FDT_WRITE_ST.Rollback;
-            FDQ_ST.CommitUpdates;
+            FDQ_ST.CancelUpdates;
             FDQ_ST.Refresh;
             Application.ShowException(E);
           end;
@@ -549,8 +542,6 @@ begin
  //отлипаем кнопку
  Action := caFree;
  fmMain.tbStations.Down:=False;
- if fmMain.IBDS_Stations.State in [dsEdit] then  fmMain.IBDS_Stations.Post;
-
 end;
 
 //Импорт  данных из DB
@@ -559,61 +550,109 @@ procedure TfmStations.ToolButton3Click(Sender: TObject);
 var i:word; s, sql_STR :string;
  qtimport: TQuery;
 begin
- DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
- if (fmMain.OpenDialog1.Execute) and (DIR_ID<>null) then
- begin
-  //определение пути и имени импортируемой БД
-  impDBpath:=fmMain.OpenDialog1.FileName;
-  s:='';
-  for i:=Length(impDBpath) downto 0 do
-  if impDBpath[i]<>'\' then s:=s+impDBpath[i] else Break;
-  Delete(impDBpath,Length(impDBpath)+1-Length(s),Length(s));
-  delete(s,1,3);
-  impDBname:='';
-  for i:=Length(s) downto 1 do impDBname:=impDBname+s[i];
-  //открытие импортируемой БД
-  try
-   qtimport:= TQuery.Create(self);
-  with qtimport do
-  begin
-   Close;
-   DatabaseName:=impDBpath;
-   Active:=false;
-   SQL.Clear;
-   SQL.Add('SELECT *');
-   SQL.Add('FROM "'+impDBname+'"');
-   Active:=true;
-  end;
-   qtimport.First;
-   fmMain.IBDS_Stations.DisableControls;
-   while not qtimport.Eof do
-   begin
-    fmMain.IBDS_Stations.Insert;
-    fmMain.IBDS_Stations.FieldByName('Dir_key').Value:=DIR_ID;
-    fmMain.IBDS_Stations.FieldByName('Koord').Value:=qtimport.FieldValues['Ostan'];
-    fmMain.IBDS_Stations.FieldByName('FName').Value:=AnsiUpperCase(qtimport.FieldValues['Name']);
-    fmMain.IBDS_Stations.FieldByName('Beg_KM').Value:=qtimport.FieldValues['NachKM'];
-    fmMain.IBDS_Stations.FieldByName('Beg_PK').Value:=qtimport.FieldValues['NachPik'];
-    fmMain.IBDS_Stations.FieldByName('End_KM').Value:=qtimport.FieldValues['KonKM'];
-    fmMain.IBDS_Stations.FieldByName('End_PK').Value:=qtimport.FieldValues['KonPik'];
-    fmMain.IBDS_Stations.FieldByName('Speed').Value:=qtimport.FieldValues['Ogr'];
-    fmMain.IBDS_Stations.Post;
-    qtimport.Next;
-   end;
-   qtimport.Close;
-   qtimport.free;
-   fmMain.IBDS_Stations.EnableControls;
-   except
-    if qtimport.Active then
+  (*
+   DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+    if (fmMain.OpenDialog1.Execute) and (DIR_ID<>null) then
     begin
-     qtimport.Close;
-     qtimport.free;
+     //определение пути и имени импортируемой БД
+     impDBpath:=fmMain.OpenDialog1.FileName;
+     s:='';
+     for i:=Length(impDBpath) downto 0 do
+     if impDBpath[i]<>'\' then s:=s+impDBpath[i] else Break;
+     Delete(impDBpath,Length(impDBpath)+1-Length(s),Length(s));
+     delete(s,1,3);
+     impDBname:='';
+     for i:=Length(s) downto 1 do impDBname:=impDBname+s[i];
+
+       //открытие импортируемой БД
+       try
+         qtimport:= TQuery.Create(self);
+         with qtimport do
+         begin
+          Close;
+          DatabaseName:=impDBpath;
+          Active:=false;
+          SQL.Clear;
+          SQL.Add('SELECT *');
+          SQL.Add('FROM "'+impDBname+'"');
+          Active:=true;
+          end;
+       except
+        on E: Exception do
+          begin
+          if qtimport.Active then  qtimport.Close;
+          qtimport.free;
+          Application.MessageBox(PWideChar('Ошибка при открытии файла *.DB:'+#13+#13+E.Message),
+                                     'Редактор базы данных автоведения',
+                                     MB_OK + MB_ICONERROR);
+          exit;
+         end;
+        end;
+
+      qtimport.First;
+
+     //импорт данных в таблицу
+
+     with FDCmd do
+       begin
+        Close;
+        CommandText.Clear;
+        CommandText.Add('INSERT INTO STATIONS (FNAME, KOORD, SPEED, DIR_KEY, BEG_KM, BEG_PK, END_KM, END_PK)');
+        CommandText.Add('VALUES (:new_FNAME, :new_KOORD, :new_SPEED, :new_DIR_KEY, :new_BEG_KM, :new_BEG_PK, :new_END_KM, :new_END_PK)');
+       end;
+
+      try
+        while not qtimport.Eof do
+        begin
+         FDT_WRITE_ST.StartTransaction;
+           FDCmd.ParamByName('new_Dir_key').Value:=DIR_ID;
+           FDCmd.ParamByName('new_Koord').Value:=qtimport.FieldValues['Координата'];
+           FDCmd.ParamByName('new_FName').Value:=qtimport.FieldValues['Назв_свет'];
+           FDCmd.ParamByName('new_Speed').Value:=qtimport.FieldValues['Скор на желт'];
+           FDCmd.Execute();
+           FDT_WRITE_ST.Commit;
+           qtimport.Next;
+
+         fmMain.IBDS_Stations.Insert;
+         fmMain.IBDS_Stations.FieldByName('Dir_key').Value:=DIR_ID;
+         fmMain.IBDS_Stations.FieldByName('Koord').Value:=qtimport.FieldValues['Ostan'];
+         fmMain.IBDS_Stations.FieldByName('FName').Value:=AnsiUpperCase(qtimport.FieldValues['Name']);
+         fmMain.IBDS_Stations.FieldByName('Beg_KM').Value:=qtimport.FieldValues['NachKM'];
+         fmMain.IBDS_Stations.FieldByName('Beg_PK').Value:=qtimport.FieldValues['NachPik'];
+         fmMain.IBDS_Stations.FieldByName('End_KM').Value:=qtimport.FieldValues['KonKM'];
+         fmMain.IBDS_Stations.FieldByName('End_PK').Value:=qtimport.FieldValues['KonPik'];
+         fmMain.IBDS_Stations.FieldByName('Speed').Value:=qtimport.FieldValues['Ogr'];
+         fmMain.IBDS_Stations.Post;
+         qtimport.Next;
+        end;
+      except
+       on E: Exception do
+       begin
+            if FDT_WRITE_ST.Active then FDT_WRITE_ST.Rollback;
+            Application.MessageBox(PWideChar('Ошибка при импорте файла:'+#13+#13+E.Message),
+                               'Редактор базы данных автоведения',
+                               MB_OK + MB_ICONERROR);
+        if qtimport.Active then  qtimport.Close;
+        qtimport.free;
+        exit;
+       end;
+      end;
+
+      qtimport.Close;
+      qtimport.free;
+      fmMain.IBDS_Stations.EnableControls;
+      except
+       if qtimport.Active then
+       begin
+        qtimport.Close;
+        qtimport.free;
+       end;
+       fmMain.IBDS_Stations.EnableControls;
+       Application.MessageBox('Ошибка при импортировании данных.', 'Внимание!', MB_OK +
+         MB_ICONSTOP + MB_TOPMOST);
+       end;
     end;
-    fmMain.IBDS_Stations.EnableControls;
-    Application.MessageBox('Ошибка при импортировании данных.', 'Внимание!', MB_OK +
-      MB_ICONSTOP + MB_TOPMOST);
-    end;
- end;
+ *)
 end;
 
 procedure TfmStations.ToolButton4Click(Sender: TObject);
