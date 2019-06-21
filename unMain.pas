@@ -76,28 +76,6 @@ type
     IBDS_Limits: TIBDataSet;
     dsLimits: TDataSource;
     ibqrySAVE: TIBQuery;
-    IBDS_Light_Signals: TIBDataSet;
-    dsLight_Signals: TDataSource;
-    IBDS_Light_SignalsID: TIntegerField;
-    IBDS_Light_SignalsDIR_KEY: TIntegerField;
-    IBDS_Light_SignalsFNAME: TIBStringField;
-    IBDS_Light_SignalsKOORD: TIntegerField;
-    IBDS_Light_SignalsSPEED: TIntegerField;
-    IBDS_Light_SignalsSHIFT_KEY: TIntegerField;
-    dsStations: TDataSource;
-    IBDS_Stations: TIBDataSet;
-    IBDS_StationsID: TIntegerField;
-    IBDS_StationsDIR_KEY: TIntegerField;
-    IBDS_StationsFNAME: TIBStringField;
-    IBDS_StationsKOORD: TIntegerField;
-    IBDS_StationsBEG_KM: TIntegerField;
-    IBDS_StationsBEG_PK: TIntegerField;
-    IBDS_StationsEND_KM: TIntegerField;
-    IBDS_StationsEND_PK: TIntegerField;
-    IBDS_StationsSPEED: TSmallintField;
-    IBDS_StationsSHIFT_KEY: TIntegerField;
-    IBDS_StationsLIN_KOORD: TLargeintField;
-    IBDS_Light_SignalsLIN_KOORD: TLargeintField;
     IBDS_Trains: TIBDataSet;
     dsTrains: TDataSource;
     IBDS_TrainsID: TIntegerField;
@@ -159,9 +137,7 @@ type
     IBDS_ObjectsFNAME: TIBStringField;
     IBDS_ObjectsCODE_STR: TIBStringField;
     IBUPD_Directions: TIBUpdateSQLW;
-    IBUPD_Stations: TIBUpdateSQLW;
     IBUPD_Limits: TIBUpdateSQLW;
-    IBUPD_Light_Signals: TIBUpdateSQLW;
     IBUPD_Trains: TIBUpdateSQLW;
     IBUPD_Time_Table: TIBUpdateSQLW;
     IBUPD_Objects: TIBUpdateSQLW;
@@ -184,6 +160,37 @@ type
     FDPhysFBDriverLink1: TFDPhysFBDriverLink;
     FDT_READ: TFDTransaction;
     FDQ_TEMP: TFDQuery;
+    dsStations: TDataSource;
+    IBDS_Stations: TIBDataSet;
+    IntegerField1: TIntegerField;
+    IntegerField2: TIntegerField;
+    IntegerField3: TIntegerField;
+    IntegerField4: TIntegerField;
+    IntegerField5: TIntegerField;
+    SmallintField1: TSmallintField;
+    IBStringField1: TIBStringField;
+    IntegerField6: TIntegerField;
+    IntegerField7: TIntegerField;
+    LargeintField1: TLargeintField;
+    LargeintField2: TLargeintField;
+    LargeintField3: TLargeintField;
+    LargeintField4: TLargeintField;
+    LargeintField5: TLargeintField;
+    IBDS_Light_Signals: TIBDataSet;
+    IntegerField8: TIntegerField;
+    IntegerField9: TIntegerField;
+    IntegerField10: TIntegerField;
+    IntegerField11: TIntegerField;
+    IntegerField12: TIntegerField;
+    SmallintField2: TSmallintField;
+    IBStringField2: TIBStringField;
+    IntegerField13: TIntegerField;
+    IntegerField14: TIntegerField;
+    LargeintField6: TLargeintField;
+    LargeintField7: TLargeintField;
+    LargeintField8: TLargeintField;
+    LargeintField9: TLargeintField;
+    LargeintField10: TLargeintField;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure CreateParams(var Params: TCreateParams); override;
     procedure tbDirectionsClick(Sender: TObject);
@@ -491,6 +498,7 @@ begin
       Add('DriverID=FB');
     end;
     fmMain.FDC_Base.Connected:=true;
+    fmMain.FDT_READ.Options.AutoStart:=false;
     fmMain.FDT_READ.StartTransaction;
 
    importGrid:=TStringGrid.Create(fmMain);
@@ -551,8 +559,6 @@ begin
   begin
    if IBDS_Directions.State in [dsEdit]         then  IBDS_Directions.Post;
    if  IBDS_Limits.State in [dsEdit]            then  IBDS_Limits.Post;
-   if  IBDS_Light_Signals.State in [dsEdit]     then  IBDS_Light_Signals.Post;
-   if  IBDS_Stations.State in [dsEdit]          then  IBDS_Stations.Post;
    if  IBDS_Trains.State in [dsEdit]            then  IBDS_Trains.Post;
    if  IBDS_TIME_TABLE.State in [dsEdit]        then  IBDS_TIME_TABLE.Post;
    if  IBDS_prof.State in [dsEdit]              then  IBDS_prof.Post;
@@ -564,7 +570,7 @@ begin
    if Way=2 then fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD' else
                  fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD DESC';
 
-   DS_Refresh(IBDS_Stations);
+  // DS_Refresh(IBDS_Stations);
    DS_Refresh(IBDS_Trains);
    DS_Refresh(IBDS_TIME_TABLE);
    DS_Refresh(IBDS_Limits);
@@ -977,8 +983,9 @@ begin
       fmLimits.Height:=LimSettings.Height;
       fmLimits.Left:=LimSettings.Left;
       fmLimits.Top:=LimSettings.Top;
+     //открываем набор данных
+     fmLimits.FDQ_LIM.Open;
     end;
-  //  else fmLimits.BringToFront;
   end else fmLimits.Close;
 end;
 

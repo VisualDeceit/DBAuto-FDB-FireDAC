@@ -317,151 +317,153 @@ var
   tmp_koord,tmp_koord1,tmp_koord0:LongInt;
   tmp_pik,st_len:Word;
 begin
-  try
-   DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
-   ind_beg:=StrToInt(Edit1.Text);
-   ind_end:=StrToInt(Edit2.Text);
-   if (DIR_ID<>null) then
-   begin
-     fmMain.IBDS_Light_Signals.DisableControls;
-     fmMain.IBDS_Objects.DisableControls;
-    for i:=ind_beg to ind_end do
-    begin
-    //если не выбран фильтр станций, то импортируем все объекты
-     if (clbFilterObjects.Checked[7]=false) then
-     begin
-      if  (AnsiCompareText(StringGrid1.Cells[2,i],'светофор')=0) then
-      begin
-         with fmMain.IBSQL do
+    (*
+    try
+       DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
+       ind_beg:=StrToInt(Edit1.Text);
+       ind_end:=StrToInt(Edit2.Text);
+       if (DIR_ID<>null) then
+       begin
+         fmMain.IBDS_Light_Signals.DisableControls;
+         fmMain.IBDS_Objects.DisableControls;
+        for i:=ind_beg to ind_end do
         begin
-         Close;
-         SQL.Clear;
-         SQL.LoadFromFile(SQL_DIR+'LS_Import.sql');
-         Params.ByName('FNAME').AsString:=Trim(StringGrid1.Cells[4,i]);
-         Params.ByName('KOORD').AsInteger:=StrToInt(StringGrid1.Cells[1,i]);
-         Params.ByName('DIR_KEY').AsInteger:=StrToInt(DIR_ID);
-         if (pos('Ч',StringGrid1.Cells[4,i])<>0) or
-            (pos('ч',StringGrid1.Cells[4,i])<>0) or
-            (pos('Н',StringGrid1.Cells[4,i])<>0) or
-            (pos('н',StringGrid1.Cells[4,i])<>0) then
-         Params.ByName('SPEED').AsInteger:=StrToInt(Edit3.Text) else
-         Params.ByName('SPEED').AsInteger:=StrToInt(Edit4.Text);
-         fmMain.IBTR_WRITE.StartTransaction;
-         ExecQuery;
-         fmMain.IBTR_WRITE.Commit;
-        end;
-
-      end  else  //объекты пути
-      if (AnsiCompareText(StringGrid1.Cells[2,i],'переезд')=0)   or
-         (AnsiCompareText(StringGrid1.Cells[2,i],'платформа')=0) or
-         (AnsiCompareText(StringGrid1.Cells[2,i],'мост')=0)      or
-         (AnsiCompareText(StringGrid1.Cells[2,i],'туннель')=0)   then
-       with fmMain.IBSQL do
-        begin
-         Close;
-         SQL.Clear;
-         SQL.LoadFromFile(SQL_DIR+'O_Import.sql');
-         Params.ByName('KOORD').AsInteger:=StrToInt(StringGrid1.Cells[1,i]);
-         Params.ByName('DIR_KEY').AsInteger:=StrToInt(DIR_ID);
-         if  AnsiCompareText(StringGrid1.Cells[2,i],'мост')=0      then Prep_key:=7;
-         if  AnsiCompareText(StringGrid1.Cells[2,i],'переезд')=0   then Prep_key:=1;
-         if  AnsiCompareText(StringGrid1.Cells[2,i],'платформа')=0 then Prep_key:=6;
-         if  AnsiCompareText(StringGrid1.Cells[2,i],'туннель')=0   then Prep_key:=8;
-         Params.ByName('OBJ_KEY').AsInteger:=Prep_key;
-         fmMain.IBTR_WRITE.StartTransaction;
-         ExecQuery;
-         fmMain.IBTR_WRITE.Commit;
-        end;
-     end
-     else  //иначе импортируем только станции
-     begin
-      if (AnsiCompareText(StringGrid1.Cells[2,i],'станция')=0) or (AnsiCompareText(StringGrid1.Cells[2,i],'платформа*')=0) then
-      with fmMain.IBSQL do
-        begin
-         Close;
-         SQL.Clear;
-         SQL.LoadFromFile(SQL_DIR+'S_Import.sql');
-         Params.ByName('DIR_KEY').AsInteger:=StrToInt(DIR_ID);
-         Params.ByName('FNAME').AsString:=Trim(StringGrid1.Cells[4,i]);
-
-         if (StrToInt(StringGrid1.Cells[5,i]) mod 10)<>3 then
-         Params.ByName('SPEED').AsInteger:=StrToInt(StringGrid1.Cells[5,i]) else
-         Params.ByName('SPEED').AsInteger:=StrToInt(StringGrid1.Cells[5,i])-3;
-
-         if (StringGrid1.Cells[8,i]<>'')  and (StringGrid1.Cells[9,i]<>'') then
-        begin
-          Params.ByName('KOORD').AsInteger:=Round(Abs(StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[8,i])])-
-                                                StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[9,i])]))/2+StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[8,i])]));
-
-          tmp_koord:=StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[8,i])]);
-          tmp_koord1:=StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[9,i])]);
-          if tmp_koord>tmp_koord1 then begin tmp_koord0:=tmp_koord; tmp_koord:=tmp_koord1; tmp_koord1:=tmp_koord0; end;
-          Params.ByName('BEG_KM').AsInteger:=(tmp_koord div 1000)+1;
-          tmp_pik:=(tmp_koord mod 1000) div 100;
-          Params.ByName('BEG_PK').AsInteger:=tmp_pik+1;
-
-          Params.ByName('END_KM').AsInteger:=(tmp_koord1 div 1000)+1;
-          tmp_pik:=(tmp_koord1 mod 1000) div 100;
-          Params.ByName('END_PK').AsInteger:=tmp_pik+1;
-        end
-        else
-        begin
-          st_len:=strtoint(StringGrid1.Cells[7,i]);
-          tmp_koord0:=StrToInt(StringGrid1.Cells[1,i]);
-          if ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
-             ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=0))
-          then
+        //если не выбран фильтр станций, то импортируем все объекты
+         if (clbFilterObjects.Checked[7]=false) then
+         begin
+          if  (AnsiCompareText(StringGrid1.Cells[2,i],'светофор')=0) then
           begin
-            tmp_koord:=tmp_koord0;
-            Params.ByName('BEG_KM').AsInteger:=(tmp_koord div 1000)+1;
-            tmp_pik:=(tmp_koord mod 1000) div 100;
-            Params.ByName('BEG_PK').AsInteger:=tmp_pik+1;
+             with fmMain.IBSQL do
+            begin
+             Close;
+             SQL.Clear;
+             SQL.LoadFromFile(SQL_DIR+'LS_Import.sql');
+             Params.ByName('FNAME').AsString:=Trim(StringGrid1.Cells[4,i]);
+             Params.ByName('KOORD').AsInteger:=StrToInt(StringGrid1.Cells[1,i]);
+             Params.ByName('DIR_KEY').AsInteger:=StrToInt(DIR_ID);
+             if (pos('Ч',StringGrid1.Cells[4,i])<>0) or
+                (pos('ч',StringGrid1.Cells[4,i])<>0) or
+                (pos('Н',StringGrid1.Cells[4,i])<>0) or
+                (pos('н',StringGrid1.Cells[4,i])<>0) then
+             Params.ByName('SPEED').AsInteger:=StrToInt(Edit3.Text) else
+             Params.ByName('SPEED').AsInteger:=StrToInt(Edit4.Text);
+             fmMain.IBTR_WRITE.StartTransaction;
+             ExecQuery;
+             fmMain.IBTR_WRITE.Commit;
+            end;
 
-            tmp_koord1:=tmp_koord+st_len;
-            Params.ByName('END_KM').AsInteger:=(tmp_koord1 div 1000)+1;
-            tmp_pik:=(tmp_koord1 mod 1000) div 100;
-            Params.ByName('END_PK').AsInteger:=tmp_pik+1;
-          end else
-          if ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
-             ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=0))
-          then
-          begin
-            tmp_koord1:=tmp_koord0;
-            tmp_koord:=tmp_koord1-st_len;
+          end  else  //объекты пути
+          if (AnsiCompareText(StringGrid1.Cells[2,i],'переезд')=0)   or
+             (AnsiCompareText(StringGrid1.Cells[2,i],'платформа')=0) or
+             (AnsiCompareText(StringGrid1.Cells[2,i],'мост')=0)      or
+             (AnsiCompareText(StringGrid1.Cells[2,i],'туннель')=0)   then
+           with fmMain.IBSQL do
+            begin
+             Close;
+             SQL.Clear;
+             SQL.LoadFromFile(SQL_DIR+'O_Import.sql');
+             Params.ByName('KOORD').AsInteger:=StrToInt(StringGrid1.Cells[1,i]);
+             Params.ByName('DIR_KEY').AsInteger:=StrToInt(DIR_ID);
+             if  AnsiCompareText(StringGrid1.Cells[2,i],'мост')=0      then Prep_key:=7;
+             if  AnsiCompareText(StringGrid1.Cells[2,i],'переезд')=0   then Prep_key:=1;
+             if  AnsiCompareText(StringGrid1.Cells[2,i],'платформа')=0 then Prep_key:=6;
+             if  AnsiCompareText(StringGrid1.Cells[2,i],'туннель')=0   then Prep_key:=8;
+             Params.ByName('OBJ_KEY').AsInteger:=Prep_key;
+             fmMain.IBTR_WRITE.StartTransaction;
+             ExecQuery;
+             fmMain.IBTR_WRITE.Commit;
+            end;
+         end
+         else  //иначе импортируем только станции
+         begin
+          if (AnsiCompareText(StringGrid1.Cells[2,i],'станция')=0) or (AnsiCompareText(StringGrid1.Cells[2,i],'платформа*')=0) then
+          with fmMain.IBSQL do
+            begin
+             Close;
+             SQL.Clear;
+             SQL.LoadFromFile(SQL_DIR+'S_Import.sql');
+             Params.ByName('DIR_KEY').AsInteger:=StrToInt(DIR_ID);
+             Params.ByName('FNAME').AsString:=Trim(StringGrid1.Cells[4,i]);
 
-            Params.ByName('BEG_KM').AsInteger:=(tmp_koord div 1000)+1;
-            tmp_pik:=(tmp_koord mod 1000) div 100;
-            Params.ByName('BEG_PK').AsInteger:=tmp_pik+1;
+             if (StrToInt(StringGrid1.Cells[5,i]) mod 10)<>3 then
+             Params.ByName('SPEED').AsInteger:=StrToInt(StringGrid1.Cells[5,i]) else
+             Params.ByName('SPEED').AsInteger:=StrToInt(StringGrid1.Cells[5,i])-3;
+
+             if (StringGrid1.Cells[8,i]<>'')  and (StringGrid1.Cells[9,i]<>'') then
+            begin
+              Params.ByName('KOORD').AsInteger:=Round(Abs(StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[8,i])])-
+                                                    StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[9,i])]))/2+StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[8,i])]));
+
+              tmp_koord:=StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[8,i])]);
+              tmp_koord1:=StrToInt(StringGrid1.Cells[1,strtoint(StringGrid1.Cells[9,i])]);
+              if tmp_koord>tmp_koord1 then begin tmp_koord0:=tmp_koord; tmp_koord:=tmp_koord1; tmp_koord1:=tmp_koord0; end;
+              Params.ByName('BEG_KM').AsInteger:=(tmp_koord div 1000)+1;
+              tmp_pik:=(tmp_koord mod 1000) div 100;
+              Params.ByName('BEG_PK').AsInteger:=tmp_pik+1;
+
+              Params.ByName('END_KM').AsInteger:=(tmp_koord1 div 1000)+1;
+              tmp_pik:=(tmp_koord1 mod 1000) div 100;
+              Params.ByName('END_PK').AsInteger:=tmp_pik+1;
+            end
+            else
+            begin
+              st_len:=strtoint(StringGrid1.Cells[7,i]);
+              tmp_koord0:=StrToInt(StringGrid1.Cells[1,i]);
+              if ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
+                 ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=0))
+              then
+              begin
+                tmp_koord:=tmp_koord0;
+                Params.ByName('BEG_KM').AsInteger:=(tmp_koord div 1000)+1;
+                tmp_pik:=(tmp_koord mod 1000) div 100;
+                Params.ByName('BEG_PK').AsInteger:=tmp_pik+1;
+
+                tmp_koord1:=tmp_koord+st_len;
+                Params.ByName('END_KM').AsInteger:=(tmp_koord1 div 1000)+1;
+                tmp_pik:=(tmp_koord1 mod 1000) div 100;
+                Params.ByName('END_PK').AsInteger:=tmp_pik+1;
+              end else
+              if ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
+                 ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=0))
+              then
+              begin
+                tmp_koord1:=tmp_koord0;
+                tmp_koord:=tmp_koord1-st_len;
+
+                Params.ByName('BEG_KM').AsInteger:=(tmp_koord div 1000)+1;
+                tmp_pik:=(tmp_koord mod 1000) div 100;
+                Params.ByName('BEG_PK').AsInteger:=tmp_pik+1;
 
 
-            Params.ByName('END_KM').AsInteger:=(tmp_koord1 div 1000)+1;
-            tmp_pik:=(tmp_koord1 mod 1000) div 100;
-            Params.ByName('END_PK').AsInteger:=tmp_pik+1;
-          end ;
-          Params.ByName('KOORD').AsInteger:=Round(Abs(tmp_koord1-tmp_koord)/2+tmp_koord);
-//          FieldByName('Koord').Value:=StrToInt(StringGrid1.Cells[1,i]);
+                Params.ByName('END_KM').AsInteger:=(tmp_koord1 div 1000)+1;
+                tmp_pik:=(tmp_koord1 mod 1000) div 100;
+                Params.ByName('END_PK').AsInteger:=tmp_pik+1;
+              end ;
+              Params.ByName('KOORD').AsInteger:=Round(Abs(tmp_koord1-tmp_koord)/2+tmp_koord);
+    //          FieldByName('Koord').Value:=StrToInt(StringGrid1.Cells[1,i]);
+            end;
+
+             //Params.ByName('KOORD').AsInteger:=StrToInt(StringGrid1.Cells[1,i]);
+
+
+             fmMain.IBTR_WRITE.StartTransaction;
+             ExecQuery;
+             fmMain.IBTR_WRITE.Commit;
+          //  end;
+
+          end;
+         end;
         end;
-
-         //Params.ByName('KOORD').AsInteger:=StrToInt(StringGrid1.Cells[1,i]);
-
-
-         fmMain.IBTR_WRITE.StartTransaction;
-         ExecQuery;
-         fmMain.IBTR_WRITE.Commit;
-      //  end;
-
+        fmMain.IBDS_Light_Signals.EnableControls;
+         fmMain.IBDS_Objects.EnableControls;
+       end;
+        Application.MessageBox('Данные успешно импортированы', 'Внимание!', MB_OK +
+        MB_ICONINFORMATION + MB_TOPMOST);
+      except
+        Application.MessageBox('Ошибка при импорте данных', 'Внимание!', MB_OK +
+          MB_ICONERROR + MB_TOPMOST);
       end;
-     end;
-    end;
-    fmMain.IBDS_Light_Signals.EnableControls;
-     fmMain.IBDS_Objects.EnableControls;
-   end;
-    Application.MessageBox('Данные успешно импортированы', 'Внимание!', MB_OK +
-    MB_ICONINFORMATION + MB_TOPMOST);
-  except
-    Application.MessageBox('Ошибка при импорте данных', 'Внимание!', MB_OK +
-      MB_ICONERROR + MB_TOPMOST);
-  end;
+  *)
 end;
 
 procedure TfmImport.N1Click(Sender: TObject);

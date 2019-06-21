@@ -26,9 +26,9 @@ uses
   Vcl.Styles,
   unUpdate in 'unUpdate.pas' {Form3},
   sevenzip in 'sevenzip.pas',
-  unGraph in 'unGraph.pas' {fmGraph},
   unGraphColors in 'unGraphColors.pas' {fmGraphColors},
-  unProfImportFormat in 'unProfImportFormat.pas' {fmProfImportFormat};
+  unProfImportFormat in 'unProfImportFormat.pas' {fmProfImportFormat},
+  unGraph in 'unGraph.pas' {fmGraph};
 
 {$R *.res}
 

@@ -41,6 +41,7 @@ object fmStations: TfmStations
     FooterParams.Color = clWindow
     IndicatorOptions = [gioShowRowIndicatorEh, gioShowRecNoEh]
     EmptyDataInfo.Active = True
+    EmptyDataInfo.Text = #1053#1077#1090' '#1076#1072#1085#1085#1099#1093
     Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
     OptionsEh = [dghFixed3D, dghHighlightFocus, dghClearSelection, dghAutoSortMarking, dghMultiSortMarking, dghEnterAsTab, dghRowHighlight, dghDialogFind, dghShowRecNo, dghColumnResize, dghColumnMove, dghHotTrack, dghExtendVertLines]
     ParentCtl3D = False
@@ -193,6 +194,7 @@ object fmStations: TfmStations
       Hint = #1053#1072#1079#1085#1072#1095#1080#1090#1100' '#1091#1095#1072#1089#1090#1082#1080
       Caption = 'ToolButton4'
       ImageIndex = 29
+      Visible = False
       OnClick = ToolButton4Click
     end
   end

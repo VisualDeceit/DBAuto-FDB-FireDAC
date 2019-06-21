@@ -257,6 +257,7 @@ object fmImport: TfmImport
       TabOrder = 3
       Columns = <
         item
+          CellButtons = <>
           DynProps = <>
           EditButtons = <>
           FieldName = 'ID'
@@ -264,6 +265,7 @@ object fmImport: TfmImport
           Visible = False
         end
         item
+          CellButtons = <>
           DynProps = <>
           EditButtons = <>
           FieldName = 'FNAME'
@@ -272,6 +274,7 @@ object fmImport: TfmImport
           Width = 199
         end
         item
+          CellButtons = <>
           DynProps = <>
           EditButtons = <>
           FieldName = 'CODE'
@@ -280,6 +283,7 @@ object fmImport: TfmImport
         end
         item
           Alignment = taLeftJustify
+          CellButtons = <>
           DynProps = <>
           EditButtons = <>
           FieldName = 'WAY'
@@ -287,6 +291,7 @@ object fmImport: TfmImport
           Title.Caption = #1055#1091#1090#1100
         end
         item
+          CellButtons = <>
           DynProps = <>
           EditButtons = <>
           FieldName = 'FLAG'

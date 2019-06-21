@@ -55,7 +55,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = 588
-        Width = 657
+        Width = 658
       end
       item
         Break = False
@@ -64,7 +64,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = -1
-        Width = 703
+        Width = 702
       end
       item
         ImageIndex = -1
@@ -75,7 +75,7 @@ object fmMain: TfmMain
     object ToolBar1: TToolBar
       Left = 11
       Top = 0
-      Width = 644
+      Width = 645
       Height = 40
       Align = alNone
       ButtonHeight = 48
@@ -275,9 +275,9 @@ object fmMain: TfmMain
       end
     end
     object ToolBar2: TToolBar
-      Left = 672
+      Left = 673
       Top = 0
-      Width = 694
+      Width = 693
       Height = 40
       Align = alNone
       ButtonHeight = 38
@@ -5939,9 +5939,8 @@ object fmMain: TfmMain
       'ORDER BY  L.beg_km, L.beg_pk')
     ParamCheck = True
     UniDirectional = False
-    UpdateObject = IBUPD_Limits
     DataSource = dsDirections
-    Left = 328
+    Left = 408
     Top = 240
     object IBDS_LimitsID: TIntegerField
       FieldName = 'ID'
@@ -6019,134 +6018,6 @@ object fmMain: TfmMain
         Name = 'TR_ID_OLD'
         ParamType = ptUnknown
       end>
-  end
-  object IBDS_Light_Signals: TIBDataSet
-    Database = IBDB_Main
-    Transaction = IBTR_READ
-    BeforePost = IBDS_Light_SignalsBeforePost
-    BufferChunks = 1000
-    CachedUpdates = False
-    SelectSQL.Strings = (
-      'SELECT LS.*,'
-      'LS.KOORD * SH.Flag + SH.FValue AS  LIN_koord'
-      'FROM  LIGHT_SIGNALS LS'
-      'LEFT OUTER JOIN Shift SH'
-      'ON  (LS.Shift_KEY = Sh.ID)'
-      'WHERE  LS.Dir_key= :ID'
-      'ORDER BY LS.KOORD')
-    ParamCheck = True
-    UniDirectional = False
-    UpdateObject = IBUPD_Light_Signals
-    DataSource = dsDirections
-    Left = 400
-    Top = 240
-    object IBDS_Light_SignalsID: TIntegerField
-      FieldName = 'ID'
-      Origin = '"LIGHT_SIGNALS"."ID"'
-    end
-    object IBDS_Light_SignalsDIR_KEY: TIntegerField
-      FieldName = 'DIR_KEY'
-      Origin = '"LIGHT_SIGNALS"."DIR_KEY"'
-    end
-    object IBDS_Light_SignalsFNAME: TIBStringField
-      FieldName = 'FNAME'
-      Origin = '"LIGHT_SIGNALS"."FNAME"'
-      Size = 10
-    end
-    object IBDS_Light_SignalsKOORD: TIntegerField
-      FieldName = 'KOORD'
-      Origin = '"LIGHT_SIGNALS"."KOORD"'
-    end
-    object IBDS_Light_SignalsSPEED: TIntegerField
-      FieldName = 'SPEED'
-      Origin = '"LIGHT_SIGNALS"."SPEED"'
-    end
-    object IBDS_Light_SignalsSHIFT_KEY: TIntegerField
-      FieldName = 'SHIFT_KEY'
-      Origin = '"LIGHT_SIGNALS"."SHIFT_KEY"'
-    end
-    object IBDS_Light_SignalsLIN_KOORD: TLargeintField
-      FieldName = 'LIN_KOORD'
-      ProviderFlags = []
-    end
-  end
-  object dsLight_Signals: TDataSource
-    DataSet = IBDS_Light_Signals
-    Left = 400
-    Top = 144
-  end
-  object dsStations: TDataSource
-    DataSet = IBDS_Stations
-    Left = 264
-    Top = 144
-  end
-  object IBDS_Stations: TIBDataSet
-    Database = IBDB_Main
-    Transaction = IBTR_READ
-    AfterPost = IBDS_StationsAfterPost
-    BeforePost = IBDS_StationsBeforePost
-    BufferChunks = 1000
-    CachedUpdates = False
-    RefreshSQL.Strings = (
-      '')
-    SelectSQL.Strings = (
-      'SELECT S.*,'
-      '(S.Koord * SH.Flag+ SH.FValue) AS  LIN_KOORD'
-      'FROM  Stations S'
-      'LEFT OUTER JOIN Shift SH'
-      'ON  (S.Shift_KEY = Sh.ID)'
-      'WHERE  S.Dir_key = :ID'
-      'ORDER BY KOORD')
-    ParamCheck = True
-    UniDirectional = False
-    UpdateObject = IBUPD_Stations
-    DataSource = dsDirections
-    Left = 256
-    Top = 288
-    object IBDS_StationsID: TIntegerField
-      FieldName = 'ID'
-      Origin = '"STATIONS"."ID"'
-    end
-    object IBDS_StationsDIR_KEY: TIntegerField
-      FieldName = 'DIR_KEY'
-      Origin = '"STATIONS"."DIR_KEY"'
-    end
-    object IBDS_StationsFNAME: TIBStringField
-      FieldName = 'FNAME'
-      Origin = '"STATIONS"."FNAME"'
-    end
-    object IBDS_StationsKOORD: TIntegerField
-      FieldName = 'KOORD'
-      Origin = '"STATIONS"."KOORD"'
-    end
-    object IBDS_StationsBEG_KM: TIntegerField
-      FieldName = 'BEG_KM'
-      Origin = '"STATIONS"."BEG_KM"'
-    end
-    object IBDS_StationsBEG_PK: TIntegerField
-      FieldName = 'BEG_PK'
-      Origin = '"STATIONS"."BEG_PK"'
-    end
-    object IBDS_StationsEND_KM: TIntegerField
-      FieldName = 'END_KM'
-      Origin = '"STATIONS"."END_KM"'
-    end
-    object IBDS_StationsEND_PK: TIntegerField
-      FieldName = 'END_PK'
-      Origin = '"STATIONS"."END_PK"'
-    end
-    object IBDS_StationsSPEED: TSmallintField
-      FieldName = 'SPEED'
-      Origin = '"STATIONS"."SPEED"'
-    end
-    object IBDS_StationsLIN_KOORD: TLargeintField
-      FieldName = 'LIN_KOORD'
-      ProviderFlags = []
-    end
-    object IBDS_StationsSHIFT_KEY: TIntegerField
-      FieldName = 'SHIFT_KEY'
-      Origin = '"STATIONS"."SHIFT_KEY"'
-    end
   end
   object IBDS_Trains: TIBDataSet
     Database = IBDB_Main
@@ -6493,45 +6364,6 @@ object fmMain: TfmMain
     Left = 192
     Top = 408
   end
-  object IBUPD_Stations: TIBUpdateSQLW
-    RefreshSQL.Strings = (
-      'Select '
-      'from Stations '
-      'where'
-      '  ID = :ID')
-    ModifySQL.Strings = (
-      'update Stations'
-      'set'
-      '  DIR_KEY = :DIR_KEY,'
-      '  FNAME = :FNAME,'
-      '  KOORD = :KOORD,'
-      '  BEG_KM = :BEG_KM,'
-      '  BEG_PK = :BEG_PK,'
-      '  END_KM = :END_KM,'
-      '  END_PK = :END_PK,'
-      '  SPEED = :SPEED,'
-      '  SHIFT_KEY = :SHIFT_KEY'
-      'where'
-      '  ID = :OLD_ID')
-    InsertSQL.Strings = (
-      'insert into Stations'
-      
-        '  (DIR_KEY, FNAME, KOORD, BEG_KM, BEG_PK, END_KM, END_PK, SPEED,' +
-        ' SHIFT_KEY)'
-      'values'
-      
-        '  (:DIR_KEY, :FNAME, :KOORD, :BEG_KM, :BEG_PK, :END_KM, :END_PK,' +
-        ' :SPEED, '
-      '   :SHIFT_KEY)')
-    DeleteSQL.Strings = (
-      'delete from Stations'
-      'where'
-      '  ID = :OLD_ID')
-    AutoCommit = True
-    UpdateTransaction = IBTR_WRITE
-    Left = 272
-    Top = 408
-  end
   object IBUPD_Limits: TIBUpdateSQLW
     RefreshSQL.Strings = (
       'Select '
@@ -6569,42 +6401,6 @@ object fmMain: TfmMain
     Left = 336
     Top = 408
   end
-  object IBUPD_Light_Signals: TIBUpdateSQLW
-    RefreshSQL.Strings = (
-      'Select '
-      '  ID,'
-      '  DIR_KEY,'
-      '  SHIFT_KEY,'
-      '  FNAME,'
-      '  KOORD,'
-      '  SPEED'
-      'from LIGHT_SIGNALS '
-      'where'
-      '  ID = :ID')
-    ModifySQL.Strings = (
-      'update LIGHT_SIGNALS'
-      'set'
-      '  DIR_KEY = :DIR_KEY,'
-      '  SHIFT_KEY = :SHIFT_KEY,'
-      '  FNAME = :FNAME,'
-      '  KOORD = :KOORD,'
-      '  SPEED = :SPEED'
-      'where'
-      '  ID = :OLD_ID')
-    InsertSQL.Strings = (
-      'insert into LIGHT_SIGNALS'
-      '  (DIR_KEY, SHIFT_KEY, FNAME, KOORD, SPEED)'
-      'values'
-      '  (:DIR_KEY, :SHIFT_KEY, :FNAME, :KOORD, :SPEED)')
-    DeleteSQL.Strings = (
-      'delete from LIGHT_SIGNALS'
-      'where'
-      '  ID = :OLD_ID')
-    AutoCommit = True
-    UpdateTransaction = IBTR_WRITE
-    Left = 416
-    Top = 408
-  end
   object IBUPD_Trains: TIBUpdateSQLW
     RefreshSQL.Strings = (
       'Select '
@@ -6632,8 +6428,8 @@ object fmMain: TfmMain
       '  ID = :OLD_ID')
     AutoCommit = True
     UpdateTransaction = IBTR_WRITE
-    Left = 512
-    Top = 408
+    Left = 488
+    Top = 416
   end
   object IBUPD_Time_Table: TIBUpdateSQLW
     RefreshSQL.Strings = (
@@ -6806,10 +6602,10 @@ object fmMain: TfmMain
       'User_Name=sysdba'
       'Password=masterkey'
       'Database=D:\BASE\BASE.fdb'
-      'Server=localhost'
       'DriverID=FB')
     FetchOptions.AssignedValues = [evAutoClose]
     FetchOptions.AutoClose = False
+    Connected = True
     Left = 976
     Top = 304
   end
@@ -6819,7 +6615,6 @@ object fmMain: TfmMain
   end
   object FDT_READ: TFDTransaction
     Options.ReadOnly = True
-    Options.AutoStart = False
     Options.AutoStop = False
     Connection = FDC_Base
     Left = 976
@@ -6836,5 +6631,196 @@ object fmMain: TfmMain
     UpdateOptions.EnableUpdate = False
     Left = 976
     Top = 408
+  end
+  object dsStations: TDataSource
+    Left = 264
+    Top = 144
+  end
+  object IBDS_Stations: TIBDataSet
+    Database = IBDB_Main
+    Transaction = IBTR_READ
+    BeforePost = IBDS_LimitsBeforePost
+    BufferChunks = 1000
+    CachedUpdates = False
+    SelectSQL.Strings = (
+      'SELECT L.*,'
+      
+        '(L.beg_km * 1000+ L.beg_pk*100)* SH.Flag+ SH.FValue AS  LIN_koor' +
+        'd,'
+      
+        '((L.beg_km * 1000 +  L.beg_pk * 100)*SH.Flag+ SH.FValue)/1000 AS' +
+        '  LIN_BEG_KM,'
+      
+        '(((L.beg_km * 1000 +  L.beg_pk * 100)*SH.Flag+ SH.FValue) - (((L' +
+        '.beg_km*1000 +  L.beg_pk* 100)*SH.Flag+ SH.FValue)/1000)*1000)/1' +
+        '00  AS LIN_BEG_PK,'
+      
+        '((L.end_km * 1000 +  L.end_pk * 100)*SH.Flag+ SH.FValue)/1000  A' +
+        'S LIN_END_KM,'
+      
+        '(((L.end_km * 1000 +  L.end_pk * 100)*SH.Flag+ SH.FValue) - (((L' +
+        '.end_km*1000 +  L.end_pk* 100)*SH.Flag+ SH.FValue)/1000)*1000)/1' +
+        '00  AS LIN_END_PK'
+      'FROM  Limits L'
+      'LEFT OUTER JOIN Shift SH'
+      'ON  (L.Shift_KEY = Sh.ID)'
+      'WHERE  L.dir_key = :id'
+      'ORDER BY  L.beg_km, L.beg_pk')
+    ParamCheck = True
+    UniDirectional = False
+    DataSource = dsDirections
+    Left = 304
+    Top = 320
+    object IntegerField1: TIntegerField
+      FieldName = 'ID'
+      Origin = '"LIMITS"."ID"'
+    end
+    object IntegerField2: TIntegerField
+      FieldName = 'BEG_KM'
+      Origin = '"LIMITS"."BEG_KM"'
+    end
+    object IntegerField3: TIntegerField
+      FieldName = 'BEG_PK'
+      Origin = '"LIMITS"."BEG_PK"'
+    end
+    object IntegerField4: TIntegerField
+      FieldName = 'END_KM'
+      Origin = '"LIMITS"."END_KM"'
+    end
+    object IntegerField5: TIntegerField
+      FieldName = 'END_PK'
+      Origin = '"LIMITS"."END_PK"'
+    end
+    object SmallintField1: TSmallintField
+      FieldName = 'SPEED'
+      Origin = '"LIMITS"."SPEED"'
+    end
+    object IBStringField1: TIBStringField
+      FieldName = 'NOTE'
+      Origin = '"LIMITS"."NOTE"'
+      Size = 30
+    end
+    object IntegerField6: TIntegerField
+      FieldName = 'DIR_KEY'
+      Origin = '"LIMITS"."DIR_KEY"'
+    end
+    object IntegerField7: TIntegerField
+      FieldName = 'SHIFT_KEY'
+      Origin = '"LIMITS"."SHIFT_KEY"'
+    end
+    object LargeintField1: TLargeintField
+      FieldName = 'LIN_KOORD'
+      ProviderFlags = []
+    end
+    object LargeintField2: TLargeintField
+      FieldName = 'LIN_BEG_KM'
+      ProviderFlags = []
+    end
+    object LargeintField3: TLargeintField
+      FieldName = 'LIN_BEG_PK'
+      ProviderFlags = []
+    end
+    object LargeintField4: TLargeintField
+      FieldName = 'LIN_END_KM'
+      ProviderFlags = []
+    end
+    object LargeintField5: TLargeintField
+      FieldName = 'LIN_END_PK'
+      ProviderFlags = []
+    end
+  end
+  object IBDS_Light_Signals: TIBDataSet
+    Database = IBDB_Main
+    Transaction = IBTR_READ
+    BeforePost = IBDS_LimitsBeforePost
+    BufferChunks = 1000
+    CachedUpdates = False
+    SelectSQL.Strings = (
+      'SELECT L.*,'
+      
+        '(L.beg_km * 1000+ L.beg_pk*100)* SH.Flag+ SH.FValue AS  LIN_koor' +
+        'd,'
+      
+        '((L.beg_km * 1000 +  L.beg_pk * 100)*SH.Flag+ SH.FValue)/1000 AS' +
+        '  LIN_BEG_KM,'
+      
+        '(((L.beg_km * 1000 +  L.beg_pk * 100)*SH.Flag+ SH.FValue) - (((L' +
+        '.beg_km*1000 +  L.beg_pk* 100)*SH.Flag+ SH.FValue)/1000)*1000)/1' +
+        '00  AS LIN_BEG_PK,'
+      
+        '((L.end_km * 1000 +  L.end_pk * 100)*SH.Flag+ SH.FValue)/1000  A' +
+        'S LIN_END_KM,'
+      
+        '(((L.end_km * 1000 +  L.end_pk * 100)*SH.Flag+ SH.FValue) - (((L' +
+        '.end_km*1000 +  L.end_pk* 100)*SH.Flag+ SH.FValue)/1000)*1000)/1' +
+        '00  AS LIN_END_PK'
+      'FROM  Limits L'
+      'LEFT OUTER JOIN Shift SH'
+      'ON  (L.Shift_KEY = Sh.ID)'
+      'WHERE  L.dir_key = :id'
+      'ORDER BY  L.beg_km, L.beg_pk')
+    ParamCheck = True
+    UniDirectional = False
+    UpdateObject = IBUPD_Limits
+    DataSource = dsDirections
+    Left = 376
+    Top = 320
+    object IntegerField8: TIntegerField
+      FieldName = 'ID'
+      Origin = '"LIMITS"."ID"'
+    end
+    object IntegerField9: TIntegerField
+      FieldName = 'BEG_KM'
+      Origin = '"LIMITS"."BEG_KM"'
+    end
+    object IntegerField10: TIntegerField
+      FieldName = 'BEG_PK'
+      Origin = '"LIMITS"."BEG_PK"'
+    end
+    object IntegerField11: TIntegerField
+      FieldName = 'END_KM'
+      Origin = '"LIMITS"."END_KM"'
+    end
+    object IntegerField12: TIntegerField
+      FieldName = 'END_PK'
+      Origin = '"LIMITS"."END_PK"'
+    end
+    object SmallintField2: TSmallintField
+      FieldName = 'SPEED'
+      Origin = '"LIMITS"."SPEED"'
+    end
+    object IBStringField2: TIBStringField
+      FieldName = 'NOTE'
+      Origin = '"LIMITS"."NOTE"'
+      Size = 30
+    end
+    object IntegerField13: TIntegerField
+      FieldName = 'DIR_KEY'
+      Origin = '"LIMITS"."DIR_KEY"'
+    end
+    object IntegerField14: TIntegerField
+      FieldName = 'SHIFT_KEY'
+      Origin = '"LIMITS"."SHIFT_KEY"'
+    end
+    object LargeintField6: TLargeintField
+      FieldName = 'LIN_KOORD'
+      ProviderFlags = []
+    end
+    object LargeintField7: TLargeintField
+      FieldName = 'LIN_BEG_KM'
+      ProviderFlags = []
+    end
+    object LargeintField8: TLargeintField
+      FieldName = 'LIN_BEG_PK'
+      ProviderFlags = []
+    end
+    object LargeintField9: TLargeintField
+      FieldName = 'LIN_END_KM'
+      ProviderFlags = []
+    end
+    object LargeintField10: TLargeintField
+      FieldName = 'LIN_END_PK'
+      ProviderFlags = []
+    end
   end
 end

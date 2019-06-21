@@ -76,7 +76,7 @@ var
 
 implementation
 
-uses unMain, unVars, unStationExport, unShiftSet, unDirection;
+uses unMain, unVars, unStationExport, unShiftSet, unDirection, unLimits;
 
 {$R *.dfm}
 
@@ -159,7 +159,6 @@ begin
     end;
 
    try
-    //  DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
     //создаем временный запрос
       with fmMain.FDQ_TEMP do
       begin
@@ -179,7 +178,9 @@ begin
         end;
       end;
 
-      for i:=1 to r_count  do
+      fmMain.FDQ_TEMP.Last;
+
+      for i:=r_count downto 1  do
       begin
        ExpTable.Insert;
        if not fl_Shift then
@@ -201,15 +202,16 @@ begin
        ExpTable.FieldValues['pyti']:=put;
        ExpTable.FieldValues['Ogr']:=fmMain.FDQ_TEMP.FieldValues['Speed'];
        ExpTable.Post;
-       if i<> r_count then fmMain.FDQ_TEMP.Next;
+       if i<>1 then fmMain.FDQ_TEMP.Prior;
       end;
-     // fmMain.IBTR_TEMP.Commit;
       Application.MessageBox(Pchar('Файл "'+ExpTable.TableName+'.db" успешно создан!'), 'Внимание!', MB_OK or MB_DEFBUTTON1 +
       MB_ICONINFORMATION + MB_TOPMOST);
    except
-      if fmMain.IBTR_TEMP.intransaction then fmMain.IBTR_TEMP.Rollback;
-       Application.MessageBox('Ошибка при создании файла!', 'Внимание!', MB_OK or MB_DEFBUTTON1 +
-      MB_ICONSTOP + MB_TOPMOST);
+       on E: Exception do
+       Application.MessageBox(PWideChar('Ошибка при создании файла:'+#13+#13+E.Message),
+                            'Редактор базы данных автоведения',
+                            MB_OK + MB_ICONERROR);
+
    end;
   finally
     ExpTable.Close;
@@ -225,25 +227,28 @@ begin
   DBG_Stations.DefaultDrawColumnCell(Rect,DataCol,Column,State);
 end;
 
+
 procedure TfmStations.N2Click(Sender: TObject);
 begin
-  if Application.MessageBox('Вы дейтсвительно хотите удалить станцию?'+#13+
-     'Текущая станция будет удалена из всех расписаний.',
-    'Предупреждение', MB_YESNO + + MB_ICONWARNING + MB_TOPMOST) = IDYES then
-  begin
-   St_ID:=IntToStr(fmMain.IBDS_StationsID.Value);
-   with fmMain.IBSQL do
-   begin
-     close;
-     SQL.Clear;
-     SQL.Add('DELETE FROM TIME_TABLE WHERE STATION_key='+St_ID);
-     fmMain.IBTR_WRITE.StartTransaction;
-     ExecQuery;
-     fmMain.IBTR_WRITE.Commit;
-   end;
-   fmMain.IBDS_Stations.Delete;
-   //UpdateTransaction(fmMain.IBDS_Stations);
-  end;
+(*
+    if Application.MessageBox('Вы дейтсвительно хотите удалить станцию?'+#13+
+       'Текущая станция будет удалена из всех расписаний.',
+      'Предупреждение', MB_YESNO + + MB_ICONWARNING + MB_TOPMOST) = IDYES then
+    begin
+     St_ID:=IntToStr(fmMain.IBDS_StationsID.Value);
+     with fmMain.IBSQL do
+     begin
+       close;
+       SQL.Clear;
+       SQL.Add('DELETE FROM TIME_TABLE WHERE STATION_key='+St_ID);
+       fmMain.IBTR_WRITE.StartTransaction;
+       ExecQuery;
+       fmMain.IBTR_WRITE.Commit;
+     end;
+     fmMain.IBDS_Stations.Delete;
+     //UpdateTransaction(fmMain.IBDS_Stations);
+    end;
+*)
 end;
 
 //экспорт в таблицу органичений
@@ -260,97 +265,98 @@ var
   shift_key_old,shift_key:variant;
 begin
  try
-   if ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
-   ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=0)) then Way:=2 else Way:=1;
+   if ((fmDirection.FDQ_DIR.FieldByName('WAY').Value = 2 )  and (fmDirection.FDQ_DIR.FieldByName('FLAG').Value=1)) or
+   ((fmDirection.FDQ_DIR.FieldByName('WAY').Value=1)  and (fmDirection.FDQ_DIR.FieldByName('FLAG').Value=0)) then Way:=2 else Way:=1;
 
-  DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
-  //выбираем станции в отдельный Query
-  with fmMain.IBQR_TEMP do
-  begin
-   Close;
-   SQL.Clear;
-   SQL.LoadFromFile(SQL_DIR+'S_Select.sql');
-   ParamByName('DIR_ID').AsInteger:=fmMain.IBDS_DirectionsID.Value;
-   fmMain.IBTR_TEMP.StartTransaction;
-   Open;
-   Last;
-   First;
-   shift_key:=fmMain.IBQR_TEMP.FieldValues['Shift_KEY'];
-   shift_key_old:=shift_key;
-   if recordcount=0 then
+  DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+
+  //создаем временный запрос
+      with fmMain.FDQ_TEMP do
+      begin
+       Close;
+       SQL.Clear;
+       SQL.LoadFromFile(SQL_DIR+'S_Select.sql');
+       ParamByName('DIR_ID').AsInteger:=fmDirection.FDQ_DIR.FieldByName('ID').Value;
+       if not fl_Shift then  SQL.Add('ORDER BY KOORD') else SQL.Add('ORDER BY LIN_KOORD') ;
+       Open;
+       r_count:=RecordCount;
+       shift_key:=FieldValues['Shift_KEY'];
+       shift_key_old:=shift_key;
+       if r_count=0 then
+       begin
+        raise ENoDataException.Create('Данные для создания файла станций остутствуют!');
+        if Active then close;
+        SQL.Clear;
+        Exit;
+        end;
+      end;
+
+   while not fmMain.FDQ_TEMP.Eof do
    begin
-    Application.MessageBox('Данные для создания файла станций остутствуют!','Ошибка', MB_OK+ MB_ICONSTOP + MB_TOPMOST);
-    if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
-    Exit;
-    end;
-  end ;
-   fmMain.IBDS_Limits.DisableControls;
-   while not fmMain.IBQR_TEMP.Eof do
-   begin
-    fmMain.IBDS_Limits.Insert;
+      fmLimits.FDQ_LIM.Insert;
     //станцию
-      fmMain.IBDS_Limits.FieldByName('Dir_key').Value:=DIR_ID;
-      fmMain.IBDS_Limits.FieldByName('BEG_KM').Value:=fmMain.IBQR_TEMP.FieldValues['Beg_KM'];
-      fmMain.IBDS_Limits.FieldByName('BEG_PK').Value:=fmMain.IBQR_TEMP.FieldValues['Beg_PK'];
-      fmMain.IBDS_Limits.FieldByName('END_KM').Value:=fmMain.IBQR_TEMP.FieldValues['End_KM'];
-      fmMain.IBDS_Limits.FieldByName('END_PK').Value:=fmMain.IBQR_TEMP.FieldValues['End_PK'];
-      if fmMain.IBQR_TEMP.FieldValues['Speed']=null then
-      fmMain.IBDS_Limits.FieldByName('Speed').Value:=60 else
-      fmMain.IBDS_Limits.FieldByName('Speed').Value:=fmMain.IBQR_TEMP.FieldValues['Speed'];
-      fmMain.IBDS_Limits.FieldByName('Note').Value:=fmMain.IBQR_TEMP.FieldValues['FName'];
-      fmMain.IBDS_Limits.FieldByName('Shift_KEY').Value:=fmMain.IBQR_TEMP.FieldValues['Shift_KEY'];
-      fmMain.IBDS_Limits.Post;
+      fmLimits.FDQ_LIM.FieldByName('Dir_key').Value:=DIR_ID;
+      fmLimits.FDQ_LIM.FieldByName('BEG_KM').Value:=fmMain.FDQ_TEMP.FieldValues['Beg_KM'];
+      fmLimits.FDQ_LIM.FieldByName('BEG_PK').Value:=fmMain.FDQ_TEMP.FieldValues['Beg_PK'];
+      fmLimits.FDQ_LIM.FieldByName('END_KM').Value:=fmMain.FDQ_TEMP.FieldValues['End_KM'];
+      fmLimits.FDQ_LIM.FieldByName('END_PK').Value:=fmMain.FDQ_TEMP.FieldValues['End_PK'];
+      if fmMain.FDQ_TEMP.FieldValues['Speed']=null then
+      fmLimits.FDQ_LIM.FieldByName('Speed').Value:=60 else
+      fmLimits.FDQ_LIM.FieldByName('Speed').Value:=fmMain.FDQ_TEMP.FieldValues['Speed'];
+      fmLimits.FDQ_LIM.FieldByName('Note').Value:=fmMain.FDQ_TEMP.FieldValues['FName'];
+      fmLimits.FDQ_LIM.FieldByName('Shift_KEY').Value:=fmMain.FDQ_TEMP.FieldValues['Shift_KEY'];
+      fmLimits.FDQ_LIM.Post;
 
-      Bkm:=fmMain.IBQR_TEMP.FieldValues['Beg_KM'];
-      Bpk:=fmMain.IBQR_TEMP.FieldValues['Beg_PK'];
-      EKm:=fmMain.IBQR_TEMP.FieldValues['End_KM'];
-      Epk:=fmMain.IBQR_TEMP.FieldValues['End_PK'];
+      Bkm:=fmMain.FDQ_TEMP.FieldValues['Beg_KM'];
+      Bpk:=fmMain.FDQ_TEMP.FieldValues['Beg_PK'];
+      EKm:=fmMain.FDQ_TEMP.FieldValues['End_KM'];
+      Epk:=fmMain.FDQ_TEMP.FieldValues['End_PK'];
 
-      shift_key_old:=fmMain.IBQR_TEMP.FieldValues['Shift_KEY'];
-      if (fmMain.IBQR_TEMP.RecNo=r_count) then Break;
-      fmMain.IBQR_TEMP.Next;
-      shift_key:=fmMain.IBQR_TEMP.FieldValues['Shift_KEY'];
+      shift_key_old:=fmMain.FDQ_TEMP.FieldValues['Shift_KEY'];
+      if (fmMain.FDQ_TEMP.RecNo = r_count) then Break;
+      fmMain.FDQ_TEMP.Next;
+      shift_key:=fmMain.FDQ_TEMP.FieldValues['Shift_KEY'];
 
       //добавляем перегон
       if (shift_key_old=shift_key) then
       begin
-        fmMain.IBDS_Limits.Insert;
-        fmMain.IBDS_Limits.FieldByName('Dir_key').Value:=DIR_ID;
-        if Bkm*10+Bpk<fmMain.IBQR_TEMP.FieldValues['Beg_KM']*10+fmMain.IBQR_TEMP.FieldValues['Beg_PK'] then
+        fmLimits.FDQ_LIM.Insert;
+        fmLimits.FDQ_LIM.FieldByName('Dir_key').Value:=DIR_ID;
+        if Bkm*10+Bpk<fmMain.FDQ_TEMP.FieldValues['Beg_KM']*10+fmMain.FDQ_TEMP.FieldValues['Beg_PK'] then
         begin
           if Epk+1>10 then begin Epk:=1; Inc(EKm) end else Inc(Epk);
-          fmMain.IBDS_Limits.FieldByName('Beg_KM').Value:=EKm;
-          fmMain.IBDS_Limits.FieldByName('Beg_PK').Value:=Epk;
-          Bkm:=fmMain.IBQR_TEMP.FieldValues['Beg_KM'];
-          Bpk:=fmMain.IBQR_TEMP.FieldValues['Beg_PK'];
+          fmLimits.FDQ_LIM.FieldByName('Beg_KM').Value:=EKm;
+          fmLimits.FDQ_LIM.FieldByName('Beg_PK').Value:=Epk;
+          Bkm:=fmMain.FDQ_TEMP.FieldValues['Beg_KM'];
+          Bpk:=fmMain.FDQ_TEMP.FieldValues['Beg_PK'];
           if Bpk-1<1 then begin Bpk:=10; Dec(Bkm);  end else Dec(Bpk);
-          fmMain.IBDS_Limits.FieldByName('End_KM').Value:=Bkm;
-          fmMain.IBDS_Limits.FieldByName('End_PK').Value:=Bpk;
+          fmLimits.FDQ_LIM.FieldByName('End_KM').Value:=Bkm;
+          fmLimits.FDQ_LIM.FieldByName('End_PK').Value:=Bpk;
         end else
         begin
           if Bpk-1<1 then begin Bpk:=10; Dec(Bkm);  end else Dec(Bpk);
-          fmMain.IBDS_Limits.FieldByName('End_KM').Value:=Bkm;
-          fmMain.IBDS_Limits.FieldByName('End_PK').Value:=Bpk;
-          EKm:=fmMain.IBQR_TEMP.FieldValues['End_KM'];
-          Epk:=fmMain.IBQR_TEMP.FieldValues['End_PK'];
+          fmLimits.FDQ_LIM.FieldByName('End_KM').Value:=Bkm;
+          fmLimits.FDQ_LIM.FieldByName('End_PK').Value:=Bpk;
+          EKm:=fmMain.FDQ_TEMP.FieldValues['End_KM'];
+          Epk:=fmMain.FDQ_TEMP.FieldValues['End_PK'];
           if Epk+1>10 then begin Epk:=1; Inc(EKm) end else Inc(Epk);
-          fmMain.IBDS_Limits.FieldByName('Beg_KM').Value:=EKm;
-          fmMain.IBDS_Limits.FieldByName('Beg_PK').Value:=Epk;
+          fmLimits.FDQ_LIM.FieldByName('Beg_KM').Value:=EKm;
+         fmLimits.FDQ_LIM.FieldByName('Beg_PK').Value:=Epk;
         end;
-        fmMain.IBDS_Limits.FieldByName('Shift_KEY').Value:=fmMain.IBQR_TEMP.FieldValues['Shift_KEY'];
-        fmMain.IBDS_Limits.FieldByName('Speed').Value:=Per_speed;
-        fmMain.IBDS_Limits.FieldByName('Note').Value:='Перегон';
-        fmMain.IBDS_Limits.Post;
+        fmLimits.FDQ_LIM.FieldByName('Shift_KEY').Value:=fmMain.FDQ_TEMP.FieldValues['Shift_KEY'];
+        fmLimits.FDQ_LIM.FieldByName('Speed').Value:=Per_speed;
+        fmLimits.FDQ_LIM.FieldByName('Note').Value:='Перегон';
+        fmLimits.FDQ_LIM.Post;
       end;
    end;
-    fmMain.IBTR_TEMP.Commit;
-    fmMain.IBDS_Limits.EnableControls;
+    //fmMain.FDQ_TEMP.Commit;
+   // fmMain.IBDS_Limits.EnableControls;
     Application.MessageBox('Данные экспортированны', 'Внимание!', MB_OK or MB_DEFBUTTON1 +
     MB_ICONINFORMATION + MB_TOPMOST);
   except
-    if fmMain.IBTR_TEMP.InTransaction  then  fmMain.IBTR_TEMP.Rollback;
-    if fmMain.IBTR_WRITE.InTransaction then  fmMain.IBTR_WRITE.Rollback;
-    fmMain.IBDS_Limits.EnableControls;
+   // if fmMain.IBTR_TEMP.InTransaction  then  fmMain.IBTR_TEMP.Rollback;
+   // if fmMain.IBTR_WRITE.InTransaction then  fmMain.IBTR_WRITE.Rollback;
+   // fmMain.IBDS_Limits.EnableControls;
     Application.MessageBox('Ошибка при экспорте данных!', 'Внимание!', MB_OK or MB_DEFBUTTON1 +
     MB_ICONSTOP + MB_TOPMOST);
  end;
@@ -361,51 +367,55 @@ end;
 //полная очистка станций в направлении
 procedure TfmStations.ToolButton2Click(Sender: TObject);
 begin
-  if Application.MessageBox('Вы дейтсвительно хотите полностью очистить таблицу станций?'+#13+
-    'Все станции будут удалены из всех расписаний.',
-    'Предупреждение', MB_YESNO + + MB_ICONWARNING + MB_TOPMOST) = IDYES then
-  begin
-    DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
-    //выбираем станции в отдельный Query
-    with fmMain.IBQR_TEMP do
+
+(*
+
+    if Application.MessageBox('Вы дейтсвительно хотите полностью очистить таблицу станций?'+#13+
+      'Все станции будут удалены из всех расписаний.',
+      'Предупреждение', MB_YESNO + + MB_ICONWARNING + MB_TOPMOST) = IDYES then
     begin
-     Close;
-     SQL.Clear;
-     SQL.LoadFromFile(SQL_DIR+'S_Select.sql');
-     ParamByName('DIR_ID').AsInteger:=fmMain.IBDS_DirectionsID.Value;
-     fmMain.IBTR_TEMP.StartTransaction;
-     Open;
-     First;
-    end ;
-    //ищем совпадение в таблице TIME_TABLE и удаляем ее от туда
-    while not fmMain.IBQR_TEMP.Eof do
-    begin
-      St_ID:=IntToStr(fmMain.IBQR_TEMP.FieldValues['ID']);
-      with fmMain.IBSQL do
+      DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
+      //выбираем станции в отдельный Query
+      with fmMain.IBQR_TEMP do
       begin
-       close;
+       Close;
        SQL.Clear;
-       SQL.Add('DELETE FROM TIME_TABLE WHERE STATION_key='+St_ID);
-       fmMain.IBTR_WRITE.StartTransaction;
-       ExecQuery;
-       fmMain.IBTR_WRITE.Commit;
+       SQL.LoadFromFile(SQL_DIR+'S_Select.sql');
+       ParamByName('DIR_ID').AsInteger:=fmMain.IBDS_DirectionsID.Value;
+       fmMain.IBTR_TEMP.StartTransaction;
+       Open;
+       First;
+      end ;
+      //ищем совпадение в таблице TIME_TABLE и удаляем ее от туда
+      while not fmMain.IBQR_TEMP.Eof do
+      begin
+        St_ID:=IntToStr(fmMain.IBQR_TEMP.FieldValues['ID']);
+        with fmMain.IBSQL do
+        begin
+         close;
+         SQL.Clear;
+         SQL.Add('DELETE FROM TIME_TABLE WHERE STATION_key='+St_ID);
+         fmMain.IBTR_WRITE.StartTransaction;
+         ExecQuery;
+         fmMain.IBTR_WRITE.Commit;
+        end;
+       fmMain.IBQR_TEMP.Next;
       end;
-     fmMain.IBQR_TEMP.Next;
+      fmMain.IBTR_TEMP.Commit;
+      //удалем все станции
+   {   with fmMain.IBSQL do
+      begin
+        close;
+        SQL.Clear;
+        SQL.Add('DELETE FROM STATIONS WHERE DIR_KEY='+DIR_ID);
+        fmMain.IBTR_WRITE.StartTransaction;
+        ExecQuery;
+        fmMain.IBTR_WRITE.Commit;
+      end;   }
+      //обновляем Dataset
+      DS_Refresh(fmMain.IBDS_Stations);
     end;
-    fmMain.IBTR_TEMP.Commit;
-    //удалем все станции
- {   with fmMain.IBSQL do
-    begin
-      close;
-      SQL.Clear;
-      SQL.Add('DELETE FROM STATIONS WHERE DIR_KEY='+DIR_ID);
-      fmMain.IBTR_WRITE.StartTransaction;
-      ExecQuery;
-      fmMain.IBTR_WRITE.Commit;
-    end;   }
-    //обновляем Dataset
-    DS_Refresh(fmMain.IBDS_Stations);
-  end;
+*)
 end;
 
 
@@ -610,7 +620,7 @@ end;
 
 procedure TfmStations.N1Click(Sender: TObject);
 begin
- fmMain.IBDS_Stations.Insert;
+ //fmMain.IBDS_Stations.Insert;
 end;
 
 end.

@@ -165,16 +165,16 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="sevenzip.pas"/>
-        <DCCReference Include="unGraph.pas">
-            <Form>fmGraph</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
         <DCCReference Include="unGraphColors.pas">
             <Form>fmGraphColors</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="unProfImportFormat.pas">
             <Form>fmProfImportFormat</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="unGraph.pas">
+            <Form>fmGraph</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Debug">

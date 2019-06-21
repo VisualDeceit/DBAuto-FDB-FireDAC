@@ -7,13 +7,16 @@ uses
   Dialogs, DB, DBTables, ExtCtrls, DBCtrls, Grids, DBGrids,
   DBGridEhGrouping, GridsEh, DBGridEh, Menus, StdCtrls,ShellAPI, ImgList,
   ComCtrls, ToolWin, ComObj, ToolCtrlsEh, DBGridEhToolCtrls, DynVarsEh,
-  EhLibVCL, DBAxisGridsEh, XMLIntf, XMLDoc;
+  EhLibVCL, DBAxisGridsEh, XMLIntf, XMLDoc, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.Client, FireDAC.Comp.DataSet;
 
 type
   TfmLimits = class(TForm)
     ToolBar5: TToolBar;
     ToolButton12: TToolButton;
-    ToolButton13: TToolButton;
+    TB_ClearAll: TToolButton;
     DBG_Limits: TDBGridEh;
     pmLimits: TPopupMenu;
     N1: TMenuItem;
@@ -25,13 +28,32 @@ type
     DB1: TMenuItem;
     N3: TMenuItem;
     ImportDialog: TOpenDialog;
+    DS_LIM: TDataSource;
+    FDQ_LIM: TFDQuery;
+    FDUSQL_LIM: TFDUpdateSQL;
+    FDT_WRITE_LIM: TFDTransaction;
+    FDCmd: TFDCommand;
+    DBNavigator1: TDBNavigator;
+    FDQ_LIMID: TFDAutoIncField;
+    FDQ_LIMBEG_KM: TIntegerField;
+    FDQ_LIMBEG_PK: TIntegerField;
+    FDQ_LIMEND_KM: TIntegerField;
+    FDQ_LIMEND_PK: TIntegerField;
+    FDQ_LIMSPEED: TSmallintField;
+    FDQ_LIMNOTE: TStringField;
+    FDQ_LIMDIR_KEY: TIntegerField;
+    FDQ_LIMSHIFT_KEY: TIntegerField;
+    FDQ_LIMLIN_KOORD: TLargeintField;
+    FDQ_LIMLIN_BEG_KM: TLargeintField;
+    FDQ_LIMLIN_BEG_PK: TLargeintField;
+    FDQ_LIMLIN_END_KM: TLargeintField;
+    FDQ_LIMLIN_END_PK: TLargeintField;
     procedure DBG_LimitsDrawColumnCell(Sender: TObject; const Rect: TRect;
       DataCol: Integer; Column: TColumnEh; State: TGridDrawState);
     procedure N1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ToolButton12Click(Sender: TObject);
-    procedure ToolButton13Click(Sender: TObject);
-    procedure N2Click(Sender: TObject);
+    procedure TB_ClearAllClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure DBG_LimitsGetCellParams(Sender: TObject; Column: TColumnEh;
       AFont: TFont; var Background: TColor; State: TGridDrawState);
@@ -39,6 +61,7 @@ type
     procedure ToolButton3Click(Sender: TObject);
     procedure DB1Click(Sender: TObject);
     procedure N3Click(Sender: TObject);
+    procedure FDQ_LIMAfterPost(DataSet: TDataSet);
   private
     { Private declarations }
   public
@@ -68,6 +91,35 @@ begin
  fmMain.IBDS_Limits.Insert; 
 end;
 
+
+procedure TfmLimits.FDQ_LIMAfterPost(DataSet: TDataSet);
+begin
+ if FDQ_LIM.UpdatesPending then
+      begin
+       //старт транзакции на запись
+        FDT_WRITE_LIM.StartTransaction;
+       //применяем изменения
+       try
+        if (FDQ_LIM.ApplyUpdates = 0) then
+        begin
+         //очищаем журнал
+         FDQ_LIM.CommitUpdates;
+         //завершаем транзакцию
+         FDT_WRITE_LIM.Commit;
+        end else
+         raise Exception.Create('Ошибка при добавлении записи');
+        except
+          on E: Exception do
+          begin
+            if FDT_WRITE_LIM.Active then FDT_WRITE_LIM.Rollback;
+            FDQ_LIM.CancelUpdates;
+            FDQ_LIM.Refresh;
+            Application.ShowException(E);
+          end;
+        end;
+    end;
+end;
+
 procedure TfmLimits.FormClose(Sender: TObject; var Action: TCloseAction);
 var
       LDocument: IXMLDocument;
@@ -93,12 +145,38 @@ begin
 
     LDocument.SaveToFile(extractfilepath(application.ExeName)+'Setup.xml');
     LDocument.Active:=false;
+
+    if FDQ_LIM.UpdatesPending then
+      begin
+       //старт транзакции на запись
+        FDT_WRITE_LIM.StartTransaction;
+       //применяем изменения
+       try
+        if (FDQ_LIM.ApplyUpdates = 0) then
+        begin
+         //очищаем журнал
+         FDQ_LIM.CommitUpdates;
+         //завершаем транзакцию
+         FDT_WRITE_LIM.Commit;
+        end else
+         raise Exception.Create('Ошибка при добавлении записи');
+        except
+          on E: Exception do
+          begin
+            if FDT_WRITE_LIM.Active then FDT_WRITE_LIM.Rollback;
+            FDQ_LIM.CancelUpdates;
+            FDQ_LIM.Refresh;
+            Application.ShowException(E);
+          end;
+        end;
+    end;
+    // закрываем набор данных
+    FDQ_LIM.Close;
   finally
 
   end;
   Action:=caFree;
   fmMain.tbLimits.Down:=False;
-  if  fmMain.IBDS_Limits.State in [dsEdit] then fmMain.IBDS_Limits.Post;
 end;
 
 
@@ -209,28 +287,34 @@ L1:
  end;
 end;
 
-procedure TfmLimits.ToolButton13Click(Sender: TObject);
+//очистка всей таблицы
+procedure TfmLimits.TB_ClearAllClick(Sender: TObject);
 begin
   if Application.MessageBox('Вы дейтсвительно хотите полностью очистить таблицу ограничений?',
-    'Очистка таблицы', MB_YESNO + MB_ICONWARNING + MB_TOPMOST) = IDYES then
+                            'Редактор базы данных автоведения',
+                            MB_YESNO + MB_ICONWARNING + MB_TOPMOST) = IDYES then
   begin
-    DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
-      with fmMain.IBSQL do
-      begin
+     DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+    with FDCmd do
+    begin
        Close;
-       SQL.Clear;
-       SQL.Add('Delete FROM LIMITS WHERE Dir_key='+DIR_ID);
-       fmMain.IBTR_WRITE.StartTransaction;
-       ExecQuery;
-       fmMain.IBTR_WRITE.Commit;
+       CommandText.Clear;
+       CommandText.Add('Delete FROM LIMITS  WHERE Dir_key='+DIR_ID);
+       FDT_WRITE_LIM.StartTransaction;
+       try
+          Execute();
+          FDT_WRITE_LIM.Commit;
+          FDQ_LIM.Refresh;
+       except
+       on E: EFDDBEngineException do
+          begin
+            if FDT_WRITE_LIM.Active then FDT_WRITE_LIM.Rollback;
+            Application.ShowException(E);
+          end;
        end;
-     DS_Refresh(fmMain.IBDS_Limits);
-  end;
-end;
+    end;
 
-procedure TfmLimits.N2Click(Sender: TObject);
-begin
- fmMain.IBDS_Limits.Delete;
+  end;
 end;
 
 procedure TfmLimits.FormDestroy(Sender: TObject);
