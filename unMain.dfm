@@ -55,7 +55,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = 588
-        Width = 658
+        Width = 660
       end
       item
         Break = False
@@ -64,7 +64,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = -1
-        Width = 702
+        Width = 700
       end
       item
         ImageIndex = -1
@@ -75,7 +75,7 @@ object fmMain: TfmMain
     object ToolBar1: TToolBar
       Left = 11
       Top = 0
-      Width = 645
+      Width = 647
       Height = 40
       Align = alNone
       ButtonHeight = 48
@@ -275,9 +275,9 @@ object fmMain: TfmMain
       end
     end
     object ToolBar2: TToolBar
-      Left = 673
+      Left = 675
       Top = 0
-      Width = 693
+      Width = 691
       Height = 40
       Align = alNone
       ButtonHeight = 38
@@ -6763,7 +6763,7 @@ object fmMain: TfmMain
     UniDirectional = False
     UpdateObject = IBUPD_Limits
     DataSource = dsDirections
-    Left = 376
+    Left = 408
     Top = 320
     object IntegerField8: TIntegerField
       FieldName = 'ID'

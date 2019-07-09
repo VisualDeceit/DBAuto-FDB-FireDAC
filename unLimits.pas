@@ -10,7 +10,7 @@ uses
   EhLibVCL, DBAxisGridsEh, XMLIntf, XMLDoc, FireDAC.Stan.Intf,
   FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
   FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
-  FireDAC.Comp.Client, FireDAC.Comp.DataSet;
+  FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Phys.IBWrapper;
 
 type
   TfmLimits = class(TForm)
@@ -193,51 +193,48 @@ var
 label L1;
 begin
  try
-  with fmMain.IBQR_TEMP do
+  DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+  if  (FDQ_LIM.FieldByName('ID').Value=null)  then
+  raise ENoDataException.Create('Нет данных для создания файла');
+  //считываем данные во временный Датасет
+  with fmMain.FDQ_TEMP do
   begin
    Close;
    SQL.Clear;
    SQL.LoadFromFile(SQL_DIR+'L_Select.sql');
-   ParamByName('DIR_ID').AsInteger:=fmMain.IBDS_DirectionsID.Value;
+   ParamByName('DIR_ID').AsInteger:=fmDirection.FDQ_DIR.FieldByName('ID').Value;
    if not fl_Shift then  SQL.Add('ORDER BY L.beg_km, L.beg_pk') else SQL.Add('ORDER BY LIN_KOORD') ;
-   fmMain.IBTR_TEMP.StartTransaction;
    Open;
-   Last;
-   First;
-   r_count:=fmMain.IBQR_TEMP.RecordCount;
+   r_count:=RecordCount;
    if r_count=0 then
    begin
-    Application.MessageBox('Данные для создания файла ограничений остутствуют!','Ошибка', MB_OK+ MB_ICONSTOP + MB_TOPMOST);
-    if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
+    raise ENoDataException.Create('Нет данных для создания файла');
+    if Active then close;
+    SQL.Clear;
     Exit;
     end;
-   end ;
-   dir:=fmMain.IBDS_Directions.FieldValues['Code'];
-   put:=fmMain.IBDS_Directions.FieldValues['WAY'];
-   file_name:='';
-   if dir<10  then file_name:='0'+IntToStr(dir) else  file_name:=IntToStr(dir);
-   file_name:=file_name+'p'+inttostr(put);
-   str:=extractfilepath(application.ExeName)+'files\'+
-                             IntToStr(fmMain.IBDS_Directions.FieldValues['Code'])+' '+
-                             fmMain.IBDS_Directions.FieldValues['FName'];
-   if not DirectoryExists(str) then  CreateDir(str);
+  end;
+  //создаем папку для файла
+   CreateFileDir(file_name, str);
+  //заполняем массив из БД
    for i:=1 to r_count do
     begin
      if not fl_Shift then
      begin
-       ogP[i].kB:=fmMain.IBQR_TEMP.FieldValues['beg_km'];
-       ogP[i].pB:=fmMain.IBQR_TEMP.FieldValues['beg_pk'];
-       ogP[i].kE:=fmMain.IBQR_TEMP.FieldValues['end_km'];
-       ogP[i].pE:=fmMain.IBQR_TEMP.FieldValues['end_pk'];
-       ogP[i].V:= fmMain.IBQR_TEMP.FieldValues['Speed'];
+       ogP[i].kB:=fmMain.FDQ_TEMP.FieldValues['beg_km'];
+       ogP[i].pB:=fmMain.FDQ_TEMP.FieldValues['beg_pk'];
+       ogP[i].kE:=fmMain.FDQ_TEMP.FieldValues['end_km'];
+       ogP[i].pE:=fmMain.FDQ_TEMP.FieldValues['end_pk'];
+       ogP[i].V:= fmMain.FDQ_TEMP.FieldValues['Speed'];
      end else
      begin
-       ogP[i].kB:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_KM'];
-       ogP[i].pB:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_PK'];
-       ogP[i].kE:=fmMain.IBQR_TEMP.FieldValues['LIN_END_KM'];
-       ogP[i].pE:=fmMain.IBQR_TEMP.FieldValues['LIN_END_PK'];
-       ogP[i].V:=fmMain.IBQR_TEMP.FieldValues['Speed'];
+       ogP[i].kB:=fmMain.FDQ_TEMP.FieldValues['LIN_BEG_KM'];
+       ogP[i].pB:=fmMain.FDQ_TEMP.FieldValues['LIN_BEG_PK'];
+       ogP[i].kE:=fmMain.FDQ_TEMP.FieldValues['LIN_END_KM'];
+       ogP[i].pE:=fmMain.FDQ_TEMP.FieldValues['LIN_END_PK'];
+       ogP[i].V:=fmMain.FDQ_TEMP.FieldValues['Speed'];
      end;
+
      //проверка ограничений
      if i>1 then
      begin
@@ -245,15 +242,15 @@ begin
             (ogP[i].kB*10+ogP[i].pB<=ogP[i-1].kE*10+ogP[i-1].pE)
             then
         begin
-         Application.MessageBox(PChar('Невозможно создать файл ограничений. Ошибка в строке № '+inttostr(i)+'.'), 'Ошибка', MB_OK
-          + MB_ICONSTOP + MB_TOPMOST);
-         if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
-         exit;
+         //Application.MessageBox(PChar('Невозможно создать файл ограничений. Ошибка в строке № '+inttostr(i)+'.'), 'Ошибка', MB_OK
+         // + MB_ICONSTOP + MB_TOPMOST);
+         //if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
+         raise EDataErrorException.Create('Ошибка при создании файла.'+#13+'Проверьте корректность данных в строке '+ inttostr(i)+'.');
         end;
      end;
-     if i<> r_count then fmMain.IBQR_TEMP.Next;
+     if i<> r_count then fmMain.FDQ_TEMP.Next;
     end;
-   fmMain.IBTR_TEMP.Commit;
+  // fmMain.IBTR_TEMP.Commit;
    if FileExists(str+'\'+file_name+'.ogr')=True then
    begin
      mes:='Папка уже содержит файл "'+file_name+'.ogr".'+#13+#13+
@@ -276,14 +273,24 @@ L1:
       end;
      closefile(fogp);
      CloseFile(deb_txt);
-      Application.MessageBox(PChar('Файл "'+file_name+'.ogr" успешно создан!'), 'Внимание!', MB_OK or MB_DEFBUTTON1 +
-      MB_ICONINFORMATION + MB_TOPMOST);
+     Application.MessageBox(PChar('Файл "'+file_name+'.ogr" успешно создан!'),
+                                   'Редактор базы данных автоведения',
+                                    MB_OK or MB_DEFBUTTON1 + MB_ICONINFORMATION + MB_TOPMOST);
     end;
    end else goto L1;
  except
-    if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
-    Application.MessageBox('Ошибка при создании файла!', 'Внимание!', MB_OK or MB_DEFBUTTON1 +
-    MB_ICONSTOP + MB_TOPMOST);
+   on E: ENoDataException do
+         Application.ShowException(E);
+   on E: EDataErrorException do
+         Application.ShowException(E);
+   on E: EIBNativeException do
+         Application.MessageBox(PWideChar('Ошибка в SQL запросе файла '+#13+SQL_DIR+'LS_Select.sql: '+#13+E.Message),
+                                'Редактор базы данных автоведения',
+                                MB_OK + MB_ICONERROR);
+   else
+     Application.MessageBox('Неизвестная ошибка.',
+                            'Редактор базы данных автоведения',
+                            MB_OK + MB_ICONERROR);
  end;
 end;
 
