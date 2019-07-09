@@ -16,14 +16,11 @@ type
   TfmLimits = class(TForm)
     ToolBar5: TToolBar;
     ToolButton12: TToolButton;
-    TB_ClearAll: TToolButton;
+    ClearAll: TToolButton;
     DBG_Limits: TDBGridEh;
-    pmLimits: TPopupMenu;
-    N1: TMenuItem;
-    N2: TMenuItem;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
-    ToolButton3: TToolButton;
+    ExportToDB: TToolButton;
     pmImport: TPopupMenu;
     DB1: TMenuItem;
     N3: TMenuItem;
@@ -53,12 +50,12 @@ type
     procedure N1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ToolButton12Click(Sender: TObject);
-    procedure TB_ClearAllClick(Sender: TObject);
+    procedure ClearAllClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure DBG_LimitsGetCellParams(Sender: TObject; Column: TColumnEh;
       AFont: TFont; var Background: TColor; State: TGridDrawState);
     procedure ToolButton2Click(Sender: TObject);
-    procedure ToolButton3Click(Sender: TObject);
+    procedure ExportToDBClick(Sender: TObject);
     procedure DB1Click(Sender: TObject);
     procedure N3Click(Sender: TObject);
     procedure FDQ_LIMAfterPost(DataSet: TDataSet);
@@ -242,9 +239,6 @@ begin
             (ogP[i].kB*10+ogP[i].pB<=ogP[i-1].kE*10+ogP[i-1].pE)
             then
         begin
-         //Application.MessageBox(PChar('Невозможно создать файл ограничений. Ошибка в строке № '+inttostr(i)+'.'), 'Ошибка', MB_OK
-         // + MB_ICONSTOP + MB_TOPMOST);
-         //if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Rollback;
          raise EDataErrorException.Create('Ошибка при создании файла.'+#13+'Проверьте корректность данных в строке '+ inttostr(i)+'.');
         end;
      end;
@@ -295,7 +289,7 @@ L1:
 end;
 
 //очистка всей таблицы
-procedure TfmLimits.TB_ClearAllClick(Sender: TObject);
+procedure TfmLimits.ClearAllClick(Sender: TObject);
 begin
   if Application.MessageBox('Вы дейтсвительно хотите полностью очистить таблицу ограничений?',
                             'Редактор базы данных автоведения',
@@ -345,7 +339,7 @@ begin
 end;
 
 //экспорт таблицы в отдельную базу формата .*db
-procedure TfmLimits.ToolButton3Click(Sender: TObject);
+procedure TfmLimits.ExportToDBClick(Sender: TObject);
 var
   i:Word;
   r_count:word;
@@ -468,66 +462,58 @@ begin
  end;
 end;
 
-//Импорт  данных из другой таблицы
-var impDBpath,impDBname:string;
+//Импорт  данных из таблицы DB
 procedure TfmLimits.DB1Click(Sender: TObject);
 var
 i:word; s:string;
 qtimport: TQuery;
 begin
- DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
+ DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
  if (fmMain.OpenDialog1.Execute) and (DIR_ID<>null) then
  begin
-  //определение пути и имени импортируемой БД
-  impDBpath:=fmMain.OpenDialog1.FileName;
-  s:='';
-  for i:=Length(impDBpath) downto 0 do
-  if impDBpath[i]<>'\' then s:=s+impDBpath[i] else Break;
-  Delete(impDBpath,Length(impDBpath)+1-Length(s),Length(s));
-  delete(s,1,3);
-  impDBname:='';
-  for i:=Length(s) downto 1 do impDBname:=impDBname+s[i];
-  //открытие импортируемой БД
-  try
-    qtimport:= TQuery.Create(self);
-    with qtimport do
-    begin
-     Close;
-     DatabaseName:=impDBpath;
-     Active:=false;
-     SQL.Clear;
-     SQL.Add('SELECT *');
-     SQL.Add('FROM "'+impDBname+'"');
-     Active:=true;
-    end;
-   qtimport.First;
-   fmMain.IBDS_Limits.DisableControls;
-   while not qtimport.Eof do
-   begin
-    fmMain.IBDS_Limits.Insert;
-    fmMain.IBDS_Limits.FieldByName('DIR_KEY').Value:=DIR_ID;
-    fmMain.IBDS_Limits.FieldByName('BEG_KM').Value:=qtimport.FieldValues['Нач_км'];
-    fmMain.IBDS_Limits.FieldByName('BEG_PK').Value:=qtimport.FieldValues['Нач_пик'];
-    fmMain.IBDS_Limits.FieldByName('END_KM').Value:=qtimport.FieldValues['Кон_км'];
-    fmMain.IBDS_Limits.FieldByName('END_PK').Value:=qtimport.FieldValues['Кон_пик'];
-    fmMain.IBDS_Limits.FieldByName('SPEED').Value:= qtimport.FieldValues['Огранич_км/ч'];
-    fmMain.IBDS_Limits.Post;
-    qtimport.Next;
-   end;
-   qtimport.Close;
-   qtimport.free;
-   fmMain.IBDS_Limits.EnableControls;
-   except
-     fmMain.IBDS_Limits.EnableControls;
-     if qtimport.Active then
+ //открытие таблицы PARADOX
+  qtimport := OpenParadoxDB(fmMain.OpenDialog1.FileName, self);
+  if qtimport = nil then exit;
+  qtimport.First;
+
+  //импорт данных в таблицу
+    try
+    with FDCmd do
      begin
-      qtimport.Close;
-      qtimport.free;
+      Close;
+      CommandText.Clear;
+      CommandText.LoadFromFile(SQL_DIR+'L_Import.sql');
      end;
 
-    Application.MessageBox('Ошибка при импортировании данных.', 'Внимание!', MB_OK +
-      MB_ICONSTOP + MB_TOPMOST);
+    while not qtimport.Eof do
+      begin
+        FDT_WRITE_LIM.StartTransaction;
+        FDCmd.ParamByName('new_Dir_key').Value:=DIR_ID;
+        FDCmd.ParamByName('new_BEG_KM').Value:=qtimport.FieldValues['Нач_км'];
+        FDCmd.ParamByName('new_BEG_PK').Value:=qtimport.FieldValues['Нач_пик'];
+        FDCmd.ParamByName('new_END_KM').Value:=qtimport.FieldValues['Кон_км'];
+        FDCmd.ParamByName('new_END_PK').Value:=qtimport.FieldValues['Кон_пик'];
+        FDCmd.ParamByName('new_SPEED').Value:=qtimport.FieldValues['Огранич_км/ч'];
+        FDCmd.Execute();
+        FDT_WRITE_LIM.Commit;
+        qtimport.Next;
+      end;
+   except
+    on E: Exception do
+    begin
+         if FDT_WRITE_LIM.Active then FDT_WRITE_LIM.Rollback;
+         Application.MessageBox(PWideChar('Ошибка при импорте файла:'+#13+#13+E.Message),
+                            'Редактор базы данных автоведения',
+                            MB_OK + MB_ICONERROR);
+     if qtimport.Active then  qtimport.Close;
+     qtimport.free;
+     exit;
     end;
+   end;
+
+   qtimport.Close;
+   qtimport.free;
+   FDQ_LIM.Refresh;
  end;
 end;
 

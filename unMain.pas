@@ -330,8 +330,7 @@ begin
   delete(s,1,3);
   impDBname:='';
   for i:=Length(s) downto 1 do impDBname:=impDBname+s[i];
-
-  //открытие импортируемой БД
+  //открытие
   try
    result:= TQuery.Create(form);
     with result do

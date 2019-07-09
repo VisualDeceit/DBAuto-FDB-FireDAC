@@ -14,14 +14,11 @@ uses
 
 type
   TfmSvet = class(TForm)
-    pmSvet: TPopupMenu;
-    N1: TMenuItem;
-    N2: TMenuItem;
     ToolBar4: TToolBar;
     ToolButton6: TToolButton;
     DBG_Svet: TDBGridEh;
     ToolButton1: TToolButton;
-    ToolButton2: TToolButton;
+    ClaerAll: TToolButton;
     DBNavigator1: TDBNavigator;
     DS_SV: TDataSource;
     FDQ_SV: TFDQuery;
@@ -41,7 +38,7 @@ type
     procedure ToolButton6Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
-    procedure ToolButton2Click(Sender: TObject);
+    procedure ClaerAllClick(Sender: TObject);
     procedure FDQ_SVAfterPost(DataSet: TDataSet);
     procedure FDQ_SVAfterDelete(DataSet: TDataSet);
   private
@@ -347,7 +344,7 @@ begin
 end;
 
 //очистка всей таблицы
-procedure TfmSvet.ToolButton2Click(Sender: TObject);
+procedure TfmSvet.ClaerAllClick(Sender: TObject);
 begin
   if Application.MessageBox('¬ы дейтсвительно хотите полностью очистить таблицу светофоров?',
                             '–едактор базы данных автоведени€',
