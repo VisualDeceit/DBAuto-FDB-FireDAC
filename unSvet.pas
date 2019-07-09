@@ -17,7 +17,7 @@ type
     ToolBar4: TToolBar;
     ToolButton6: TToolButton;
     DBG_Svet: TDBGridEh;
-    ToolButton1: TToolButton;
+    ImportFromDB: TToolButton;
     ClaerAll: TToolButton;
     DBNavigator1: TDBNavigator;
     DS_SV: TDataSource;
@@ -37,7 +37,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ToolButton6Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure ToolButton1Click(Sender: TObject);
+    procedure ImportFromDBClick(Sender: TObject);
     procedure ClaerAllClick(Sender: TObject);
     procedure FDQ_SVAfterPost(DataSet: TDataSet);
     procedure FDQ_SVAfterDelete(DataSet: TDataSet);
@@ -292,7 +292,7 @@ begin
 end;
 
 //Импорт  данных из таблицы *.DB
-procedure TfmSvet.ToolButton1Click(Sender: TObject);
+procedure TfmSvet.ImportFromDBClick(Sender: TObject);
 var
   qtimport: TQuery;
 begin

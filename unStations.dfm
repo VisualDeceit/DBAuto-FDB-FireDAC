@@ -284,13 +284,13 @@ object fmStations: TfmStations
   object PopupMenu2: TPopupMenu
     Left = 176
     Top = 168
-    object N3: TMenuItem
+    object ExportToLimits: TMenuItem
       Caption = #1074' '#1090#1072#1073#1083#1080#1094#1091' '#1086#1075#1088#1072#1085#1080#1095#1077#1085#1080#1081
-      OnClick = N3Click
+      OnClick = ExportToLimitsClick
     end
-    object db1: TMenuItem
+    object ExportToDB: TMenuItem
       Caption = #1074' '#1092#1072#1081#1083' *.db'
-      OnClick = db1Click
+      OnClick = ExportToDBClick
     end
   end
   object DS_ST: TDataSource

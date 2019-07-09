@@ -54,15 +54,15 @@ object fmSvet: TfmSvet
       ShowHint = True
       OnClick = ClaerAllClick
     end
-    object ToolButton1: TToolButton
+    object ImportFromDB: TToolButton
       Left = 78
       Top = 0
       Hint = #1048#1084#1087#1086#1088#1090' '#1080#1079' DB'
-      Caption = 'ToolButton1'
+      Caption = 'ImportFromDB'
       ImageIndex = 16
       ParentShowHint = False
       ShowHint = True
-      OnClick = ToolButton1Click
+      OnClick = ImportFromDBClick
     end
   end
   object DBG_Svet: TDBGridEh

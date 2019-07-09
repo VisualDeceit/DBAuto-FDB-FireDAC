@@ -30,8 +30,8 @@ type
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     PopupMenu2: TPopupMenu;
-    N3: TMenuItem;
-    db1: TMenuItem;
+    ExportToLimits: TMenuItem;
+    ExportToDB: TMenuItem;
     DBNavigator1: TDBNavigator;
     DS_ST: TDataSource;
     FDQ_ST: TFDQuery;
@@ -59,8 +59,8 @@ type
     procedure ToolButton3Click(Sender: TObject);
     procedure ToolButton4Click(Sender: TObject);
     procedure N1Click(Sender: TObject);
-    procedure N3Click(Sender: TObject);
-    procedure db1Click(Sender: TObject);
+    procedure ExportToLimitsClick(Sender: TObject);
+    procedure ExportToDBClick(Sender: TObject);
     procedure FDQ_STAfterPost(DataSet: TDataSet);
     procedure FDQ_STAfterDelete(DataSet: TDataSet);
   private
@@ -81,11 +81,10 @@ uses unMain, unVars, unStationExport, unShiftSet, unDirection, unLimits;
 {$R *.dfm}
 
 //экспорт в таблицу *.DB
-procedure TfmStations.db1Click(Sender: TObject);
+procedure TfmStations.ExportToDBClick(Sender: TObject);
 var
   i:Word;
   r_count:word;
-  dir:Byte;
   put:byte;
   file_name:string;
   str:string;
@@ -93,15 +92,9 @@ var
   mes :string;
   ExpTable: TTable;
 begin
-   dir:=fmDirection.FDQ_DIR.FieldByName('CODE').AsInteger;
-   put:=fmDirection.FDQ_DIR.FieldByName('WAY').AsInteger;
-   file_name:='';
-   if dir<10  then file_name:='0'+IntToStr(dir) else  file_name:=IntToStr(dir);
-   file_name:=file_name+'p'+inttostr(put);
-   str:=extractfilepath(application.ExeName)+'files\'+
-                             fmDirection.FDQ_DIR.FieldByName('CODE').AsString+' '+
-                             fmDirection.FDQ_DIR.FieldByName('FNAME').AsString;
-  if not DirectoryExists(str) then  CreateDir(str);
+  //создаем папку для файла
+   CreateFileDir(file_name, str, put);
+
   ExpTable:=TTable.Create(self);
   try
     with ExpTable do
@@ -252,7 +245,7 @@ begin
 end;
 
 //экспорт в таблицу органичений
-procedure TfmStations.N3Click(Sender: TObject);
+procedure TfmStations.ExportToLimitsClick(Sender: TObject);
 var
   i:Word;
   r_count:word;

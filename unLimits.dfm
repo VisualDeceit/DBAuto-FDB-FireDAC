@@ -33,7 +33,7 @@ object fmLimits: TfmLimits
     Images = fmMain.ImageList1
     ParentColor = False
     TabOrder = 0
-    object ToolButton12: TToolButton
+    object FileCreate: TToolButton
       Left = 0
       Top = 0
       Hint = #1057#1086#1079#1076#1072#1090#1100' '#1092#1072#1081#1083
@@ -42,7 +42,7 @@ object fmLimits: TfmLimits
       ImageIndex = 5
       ParentShowHint = False
       ShowHint = True
-      OnClick = ToolButton12Click
+      OnClick = FileCreateClick
     end
     object ClearAll: TToolButton
       Left = 39
@@ -221,13 +221,13 @@ object fmLimits: TfmLimits
   object pmImport: TPopupMenu
     Left = 96
     Top = 160
-    object DB1: TMenuItem
+    object ImportFromDB: TMenuItem
       Caption = #1048#1084#1087#1086#1088#1090' '#1076#1072#1085#1085#1099#1093' '#1080#1079' '#1092#1072#1081#1083#1072' *.db'
-      OnClick = DB1Click
+      OnClick = ImportFromDBClick
     end
-    object N3: TMenuItem
+    object ImportFromXLS: TMenuItem
       Caption = #1048#1084#1087#1086#1088#1090' '#1076#1072#1085#1085#1099#1093' '#1080#1079' '#1092#1072#1081#1083#1072' *.xls'
-      OnClick = N3Click
+      OnClick = ImportFromXLSClick
     end
   end
   object ImportDialog: TOpenDialog

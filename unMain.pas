@@ -278,7 +278,7 @@ var
  procedure DS_Refresh_All;
  procedure Init;
  function OpenParadoxDB(impDBpath: string; form: TComponent): TQuery;
- procedure CreateFileDir(var file_name, file_path:String);
+ procedure CreateFileDir(var file_name, file_path:String; var put: byte);
 
 
 implementation
@@ -358,9 +358,9 @@ begin
 end;
 
 //создание папки для файла и возврат имени папки и пути
-procedure CreateFileDir(var file_name, file_path:String);
+ procedure CreateFileDir(var file_name, file_path: String; var put: byte);
 var
- dir, put: word;
+ dir: word;
 begin
    dir:=fmDirection.FDQ_DIR.FieldByName('Code').Value;
    put:=fmDirection.FDQ_DIR.FieldByName('WAY').Value;

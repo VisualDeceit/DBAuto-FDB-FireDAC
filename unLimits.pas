@@ -15,15 +15,15 @@ uses
 type
   TfmLimits = class(TForm)
     ToolBar5: TToolBar;
-    ToolButton12: TToolButton;
+    FileCreate: TToolButton;
     ClearAll: TToolButton;
     DBG_Limits: TDBGridEh;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
     ExportToDB: TToolButton;
     pmImport: TPopupMenu;
-    DB1: TMenuItem;
-    N3: TMenuItem;
+    ImportFromDB: TMenuItem;
+    ImportFromXLS: TMenuItem;
     ImportDialog: TOpenDialog;
     DS_LIM: TDataSource;
     FDQ_LIM: TFDQuery;
@@ -49,15 +49,15 @@ type
       DataCol: Integer; Column: TColumnEh; State: TGridDrawState);
     procedure N1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure ToolButton12Click(Sender: TObject);
+    procedure FileCreateClick(Sender: TObject);
     procedure ClearAllClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure DBG_LimitsGetCellParams(Sender: TObject; Column: TColumnEh;
       AFont: TFont; var Background: TColor; State: TGridDrawState);
     procedure ToolButton2Click(Sender: TObject);
     procedure ExportToDBClick(Sender: TObject);
-    procedure DB1Click(Sender: TObject);
-    procedure N3Click(Sender: TObject);
+    procedure ImportFromDBClick(Sender: TObject);
+    procedure ImportFromXLSClick(Sender: TObject);
     procedure FDQ_LIMAfterPost(DataSet: TDataSet);
   private
     { Private declarations }
@@ -177,7 +177,7 @@ begin
 end;
 
 
-procedure TfmLimits.ToolButton12Click(Sender: TObject);
+procedure TfmLimits.FileCreateClick(Sender: TObject);
 var
   i:Word;
   r_count:word;
@@ -212,7 +212,7 @@ begin
     end;
   end;
   //создаем папку для файла
-   CreateFileDir(file_name, str);
+   CreateFileDir(file_name, str, put);
   //заполняем массив из БД
    for i:=1 to r_count do
     begin
@@ -343,7 +343,6 @@ procedure TfmLimits.ExportToDBClick(Sender: TObject);
 var
   i:Word;
   r_count:word;
-  dir:Byte;
   put:byte;
   file_name:string;
   str:string;
@@ -351,24 +350,131 @@ var
   mes,SQL_Str :string;
   ExpTable: TTable;
 begin
-   dir:=fmMain.IBDS_Directions.FieldValues['Code'];
-   put:=fmMain.IBDS_Directions.FieldValues['WAY'];
-   file_name:='';
-   if dir<10  then file_name:='0'+IntToStr(dir) else  file_name:=IntToStr(dir);
-   file_name:=file_name+'p'+inttostr(put);
-   str:=extractfilepath(application.ExeName)+'files\'+
-                             IntToStr(fmMain.IBDS_Directions.FieldValues['Code'])+' '+
-                             fmMain.IBDS_Directions.FieldValues['FName'];
-  if not DirectoryExists(str) then  CreateDir(str);
+      (*
+     dir:=fmMain.IBDS_Directions.FieldValues['Code'];
+        put:=fmMain.IBDS_Directions.FieldValues['WAY'];
+        file_name:='';
+        if dir<10  then file_name:='0'+IntToStr(dir) else  file_name:=IntToStr(dir);
+        file_name:=file_name+'p'+inttostr(put);
+        str:=extractfilepath(application.ExeName)+'files\'+
+                                  IntToStr(fmMain.IBDS_Directions.FieldValues['Code'])+' '+
+                                  fmMain.IBDS_Directions.FieldValues['FName'];
+       if not DirectoryExists(str) then  CreateDir(str);
+       ExpTable:=TTable.Create(self);
+       with ExpTable do
+       begin
+        Active := False;
+        DatabaseName := str+'\';
+        TableType := ttParadox;
+        TableName := fmMain.IBDS_Directions.FieldValues['FNAME']+'_p'+inttostr(put)+'_OGR';
+         {Создаем поля:}
+         with FieldDefs do begin
+           Clear;
+           with AddFieldDef do begin
+               Name := 'Номер';
+               DataType := ftWord;
+           end; //with
+           with AddFieldDef do begin
+               Name := 'Название_станц';
+               DataType := ftString;
+               Size := 30;
+           end; //with
+           with AddFieldDef do begin
+               Name := 'Нач_км';
+               DataType := ftWord;
+           end; //with
+           with AddFieldDef do begin
+               Name := 'Нач_пик';
+               DataType := ftWord;
+           end; //with
+           with AddFieldDef do begin
+               Name := 'Кон_км';
+               DataType := ftWord;
+           end; //with
+           with AddFieldDef do begin
+               Name := 'Кон_пик';
+               DataType := ftWord;
+           end; //with
+           with AddFieldDef do begin
+               Name := 'Огранич_км/ч';
+               DataType := ftWord;
+           end; //with
+         end; //with
+
+         //создаем таблицу:
+        CreateTable;
+         //и открываем ее:
+        Open;
+       end;
+      try
+         DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
+         with fmMain.IBQR_TEMP do
+         begin
+          Close;
+          SQL.Clear;
+          SQL.LoadFromFile(SQL_DIR+'L_Select.sql');
+          ParamByName('DIR_ID').AsInteger:=fmMain.IBDS_DirectionsID.Value;
+          if not fl_Shift then  SQL.Add('ORDER BY L.beg_km, L.beg_pk') else SQL.Add('ORDER BY LIN_KOORD') ;
+          fmMain.IBTR_TEMP.StartTransaction;
+          Open;
+          Last;
+          First;
+          r_count:=fmMain.IBQR_TEMP.RecordCount;
+          if r_count=0 then
+          begin
+           Application.MessageBox('Данные для экспорта остутствуют!','Ошибка', MB_OK+ MB_ICONSTOP + MB_TOPMOST);
+           if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Commit;
+           Exit;
+           end;
+           last;
+         end ;
+         for i:=r_count downto 1  do
+         begin
+          ExpTable.Insert;
+          if not fl_Shift then
+          begin
+            ExpTable.FieldValues['Нач_км']:=fmMain.IBQR_TEMP.FieldValues['beg_km'];
+            ExpTable.FieldValues['Нач_пик']:=fmMain.IBQR_TEMP.FieldValues['beg_pk'];
+            ExpTable.FieldValues['Кон_км']:=fmMain.IBQR_TEMP.FieldValues['end_km'];
+            ExpTable.FieldValues['Кон_пик']:=fmMain.IBQR_TEMP.FieldValues['end_pk'];
+            ExpTable.FieldValues['Огранич_км/ч']:=fmMain.IBQR_TEMP.FieldValues['Speed'];
+          end else
+          begin
+            ExpTable.FieldValues['Нач_км']:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_KM'];
+            ExpTable.FieldValues['Нач_пик']:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_PK'];
+            ExpTable.FieldValues['Кон_км']:=fmMain.IBQR_TEMP.FieldValues['LIN_END_KM'];
+            ExpTable.FieldValues['Кон_пик']:=fmMain.IBQR_TEMP.FieldValues['LIN_END_PK'];
+          end;
+          ExpTable.FieldValues['Номер']:=i;
+          ExpTable.FieldValues['Огранич_км/ч']:=fmMain.IBQR_TEMP.FieldValues['Speed'];
+          ExpTable.Post;
+          if i<> 1 then fmMain.IBQR_TEMP.Prior;
+         end;
+         ExpTable.Close;
+         ExpTable.Free;
+         fmMain.IBTR_TEMP.Commit;
+         Application.MessageBox(Pchar('Файл "'+ExpTable.TableName+'.db" успешно создан!'), 'Внимание!', MB_OK or MB_DEFBUTTON1 +
+         MB_ICONINFORMATION + MB_TOPMOST);
+      except
+         if fmMain.IBTR_TEMP.intransaction then fmMain.IBTR_TEMP.Rollback;
+          Application.MessageBox('Ошибка при создании файла!', 'Внимание!', MB_OK or MB_DEFBUTTON1 +
+         MB_ICONSTOP + MB_TOPMOST);
+      end;
+   *)
+
+  //создаем папку для файла
+   CreateFileDir(file_name, str, put);
+  //создаем таблицу paradox
   ExpTable:=TTable.Create(self);
-  with ExpTable do
-  begin
-   Active := False;
-   DatabaseName := str+'\';
-   TableType := ttParadox;
-   TableName := fmMain.IBDS_Directions.FieldValues['FNAME']+'_p'+inttostr(put)+'_OGR';
-    {Создаем поля:}
-    with FieldDefs do begin
+  try
+    with ExpTable do
+    begin
+     Active := False;
+     DatabaseName := str+'\';
+     TableType := ttParadox;
+     TableName := 'ogran_'+inttostr(put)+'p';
+      {Создаем поля:}
+     with FieldDefs do begin
       Clear;
       with AddFieldDef do begin
           Name := 'Номер';
@@ -399,71 +505,74 @@ begin
           Name := 'Огранич_км/ч';
           DataType := ftWord;
       end; //with
-    end; //with
-
-    //создаем таблицу:
-   CreateTable;
-    //и открываем ее:
-   Open;
-  end;
- try
-    DIR_ID:=IntToStr(fmMain.IBDS_DirectionsID.Value);
-    with fmMain.IBQR_TEMP do
-    begin
-     Close;
-     SQL.Clear;
-     SQL.LoadFromFile(SQL_DIR+'L_Select.sql');
-     ParamByName('DIR_ID').AsInteger:=fmMain.IBDS_DirectionsID.Value;
-     if not fl_Shift then  SQL.Add('ORDER BY L.beg_km, L.beg_pk') else SQL.Add('ORDER BY LIN_KOORD') ;
-     fmMain.IBTR_TEMP.StartTransaction;
+     end; //with
+      //создаем таблицу:
+     CreateTable;
+      //и открываем ее:
      Open;
-     Last;
-     First;
-     r_count:=fmMain.IBQR_TEMP.RecordCount;
-     if r_count=0 then
-     begin
-      Application.MessageBox('Данные для экспорта остутствуют!','Ошибка', MB_OK+ MB_ICONSTOP + MB_TOPMOST);
-      if fmMain.IBTR_TEMP.InTransaction then fmMain.IBTR_TEMP.Commit; 
-      Exit;
-      end;
-      last;
-    end ;
-    for i:=r_count downto 1  do
-    begin
-     ExpTable.Insert;
-     if not fl_Shift then
-     begin
-       ExpTable.FieldValues['Нач_км']:=fmMain.IBQR_TEMP.FieldValues['beg_km'];
-       ExpTable.FieldValues['Нач_пик']:=fmMain.IBQR_TEMP.FieldValues['beg_pk'];
-       ExpTable.FieldValues['Кон_км']:=fmMain.IBQR_TEMP.FieldValues['end_km'];
-       ExpTable.FieldValues['Кон_пик']:=fmMain.IBQR_TEMP.FieldValues['end_pk'];
-       ExpTable.FieldValues['Огранич_км/ч']:=fmMain.IBQR_TEMP.FieldValues['Speed'];
-     end else
-     begin
-       ExpTable.FieldValues['Нач_км']:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_KM'];
-       ExpTable.FieldValues['Нач_пик']:=fmMain.IBQR_TEMP.FieldValues['LIN_BEG_PK'];
-       ExpTable.FieldValues['Кон_км']:=fmMain.IBQR_TEMP.FieldValues['LIN_END_KM'];
-       ExpTable.FieldValues['Кон_пик']:=fmMain.IBQR_TEMP.FieldValues['LIN_END_PK'];
-     end;
-     ExpTable.FieldValues['Номер']:=i;
-     ExpTable.FieldValues['Огранич_км/ч']:=fmMain.IBQR_TEMP.FieldValues['Speed'];
-     ExpTable.Post;
-     if i<> 1 then fmMain.IBQR_TEMP.Prior;
     end;
+
+   try
+    //создаем временный запрос
+      with fmMain.FDQ_TEMP do
+      begin
+       Close;
+       SQL.Clear;
+       SQL.LoadFromFile(SQL_DIR+'L_Select.sql');
+       ParamByName('DIR_ID').AsInteger:=fmDirection.FDQ_DIR.FieldByName('ID').Value;
+       if not fl_Shift then  SQL.Add('ORDER BY L.beg_km, L.beg_pk') else SQL.Add('ORDER BY LIN_KOORD') ;
+       Open;
+       r_count:=RecordCount;
+       if r_count=0 then
+       begin
+        raise ENoDataException.Create('Нет данных для создания файла');
+        if Active then close;
+        SQL.Clear;
+        Exit;
+        end;
+      end;
+
+      fmMain.FDQ_TEMP.Last;
+
+      for i:=r_count downto 1  do
+      begin
+       ExpTable.Insert;
+       if not fl_Shift then
+       begin
+         ExpTable.FieldValues['Нач_км']:=fmMain.FDQ_TEMP.FieldValues['beg_km'];
+         ExpTable.FieldValues['Нач_пик']:=fmMain.FDQ_TEMP.FieldValues['beg_pk'];
+         ExpTable.FieldValues['Кон_км']:=fmMain.FDQ_TEMP.FieldValues['end_km'];
+         ExpTable.FieldValues['Кон_пик']:=fmMain.FDQ_TEMP.FieldValues['end_pk'];
+         ExpTable.FieldValues['Огранич_км/ч']:=fmMain.FDQ_TEMP.FieldValues['Speed'];
+       end else
+       begin
+         ExpTable.FieldValues['Нач_км']:=fmMain.FDQ_TEMP.FieldValues['LIN_BEG_KM'];
+         ExpTable.FieldValues['Нач_пик']:=fmMain.FDQ_TEMP.FieldValues['LIN_BEG_PK'];
+         ExpTable.FieldValues['Кон_км']:=fmMain.FDQ_TEMP.FieldValues['LIN_END_KM'];
+         ExpTable.FieldValues['Кон_пик']:=fmMain.FDQ_TEMP.FieldValues['LIN_END_PK'];
+       end;
+       ExpTable.FieldValues['Номер']:=i;
+       ExpTable.FieldValues['Огранич_км/ч']:=fmMain.FDQ_TEMP.FieldValues['Speed'];
+       ExpTable.Post;
+       if i<>1 then fmMain.FDQ_TEMP.Prior;
+      end;
+      Application.MessageBox(Pchar('Файл "'+ExpTable.TableName+'.db" успешно создан!'), 'Внимание!', MB_OK or MB_DEFBUTTON1 +
+      MB_ICONINFORMATION + MB_TOPMOST);
+   except
+       on E: Exception do
+       Application.MessageBox(PWideChar('Ошибка при создании файла:'+#13+#13+E.Message),
+                            'Редактор базы данных автоведения',
+                            MB_OK + MB_ICONERROR);
+   end;
+  finally
     ExpTable.Close;
     ExpTable.Free;
-    fmMain.IBTR_TEMP.Commit;
-    Application.MessageBox(Pchar('Файл "'+ExpTable.TableName+'.db" успешно создан!'), 'Внимание!', MB_OK or MB_DEFBUTTON1 +
-    MB_ICONINFORMATION + MB_TOPMOST);
- except
-    if fmMain.IBTR_TEMP.intransaction then fmMain.IBTR_TEMP.Rollback;
-     Application.MessageBox('Ошибка при создании файла!', 'Внимание!', MB_OK or MB_DEFBUTTON1 +
-    MB_ICONSTOP + MB_TOPMOST);
- end;
+  end;
+
 end;
 
 //Импорт  данных из таблицы DB
-procedure TfmLimits.DB1Click(Sender: TObject);
+procedure TfmLimits.ImportFromDBClick(Sender: TObject);
 var
 i:word; s:string;
 qtimport: TQuery;
@@ -518,7 +627,7 @@ begin
 end;
 
 //импорт их xls
-procedure TfmLimits.N3Click(Sender: TObject);
+procedure TfmLimits.ImportFromXLSClick(Sender: TObject);
 const
   xlCellTypeLastCell = $0000000B;
 var
