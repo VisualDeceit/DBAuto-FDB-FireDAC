@@ -55,7 +55,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = 588
-        Width = 660
+        Width = 663
       end
       item
         Break = False
@@ -64,7 +64,7 @@ object fmMain: TfmMain
         ImageIndex = -1
         MinHeight = 40
         MinWidth = -1
-        Width = 700
+        Width = 697
       end
       item
         ImageIndex = -1
@@ -75,7 +75,7 @@ object fmMain: TfmMain
     object ToolBar1: TToolBar
       Left = 11
       Top = 0
-      Width = 647
+      Width = 650
       Height = 40
       Align = alNone
       ButtonHeight = 48
@@ -251,19 +251,19 @@ object fmMain: TfmMain
         ImageIndex = 26
         Style = tbsDivider
       end
-      object ToolButton11: TToolButton
-        Left = 527
-        Top = 0
-        Caption = 'ToolButton11'
-        ImageIndex = 27
-        OnClick = ToolButton11Click
-      end
       object btn1: TToolButton
-        Left = 566
+        Left = 527
         Top = 0
         Caption = 'btn1'
         ImageIndex = 33
         OnClick = btn1Click
+      end
+      object ToolButton11: TToolButton
+        Left = 566
+        Top = 0
+        Caption = 'ToolButton11'
+        ImageIndex = 27
+        OnClick = ToolButton11Click
       end
       object ToolButton9: TToolButton
         Left = 605
@@ -275,9 +275,9 @@ object fmMain: TfmMain
       end
     end
     object ToolBar2: TToolBar
-      Left = 675
+      Left = 678
       Top = 0
-      Width = 691
+      Width = 688
       Height = 40
       Align = alNone
       ButtonHeight = 38
@@ -6208,7 +6208,6 @@ object fmMain: TfmMain
   end
   object IBTR_TEMP: TIBTransaction
     AllowAutoStart = False
-    DefaultDatabase = IBDB_Main
     Params.Strings = (
       'read_committed'
       'rec_version'
@@ -6605,7 +6604,6 @@ object fmMain: TfmMain
       'DriverID=FB')
     FetchOptions.AssignedValues = [evAutoClose]
     FetchOptions.AutoClose = False
-    Connected = True
     Left = 976
     Top = 304
   end
@@ -6822,5 +6820,19 @@ object fmMain: TfmMain
       FieldName = 'LIN_END_PK'
       ProviderFlags = []
     end
+  end
+  object FDFBNBackup1: TFDFBNBackup
+    DriverLink = FDPhysFBDriverLink1
+    UserName = 'sysdba'
+    Password = 'masterkey'
+    Database = 'D:\BASE\BASE.fdb'
+    BackupFile = 'D:\BASE\BASE.backup'
+    Left = 976
+    Top = 480
+  end
+  object FDFBNRestore1: TFDFBNRestore
+    DriverLink = FDPhysFBDriverLink1
+    Left = 976
+    Top = 536
   end
 end

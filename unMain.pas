@@ -9,7 +9,7 @@ uses
   DBGridEhGrouping, GridsEh, DBGridEh, ComCtrls, ToolWin,ComObj,
   MemTableDataEh, DataDriverEh, MemTableEh, StdActns,
   ActnList, Mask, DBCtrlsEh, DBLookupEh, IBCustomDataSet, IBQuery,
-  IBDatabase, PrnDbgeh, IBSQL, IBScript, IBUpdateSQL, IBUpdateSQLW,
+  PrnDbgeh, IBSQL, IBScript, IBUpdateSQL, IBUpdateSQLW,
   System.Actions, System.ImageList, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
   FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait,
@@ -17,7 +17,7 @@ uses
   IdTCPClient, IdHTTP, XMLIntf, XMLDoc, WinSock, FireDAC.Phys.FB,
   FireDAC.Phys.FBDef, FireDAC.Phys.IBBase, FireDAC.VCLUI.Error, FireDAC.Comp.UI,
   FireDAC.FMXUI.Error, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf,
-  FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Phys.IBWrapper, IBX.IBDatabase, System.DateUtils;
 
 type
   TfmMain = class (TForm)
@@ -191,6 +191,8 @@ type
     LargeintField8: TLargeintField;
     LargeintField9: TLargeintField;
     LargeintField10: TLargeintField;
+    FDFBNBackup1: TFDFBNBackup;
+    FDFBNRestore1: TFDFBNRestore;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure CreateParams(var Params: TCreateParams); override;
     procedure tbDirectionsClick(Sender: TObject);
@@ -373,6 +375,86 @@ begin
    if not DirectoryExists(file_path) then  CreateDir(file_path);
 end;
 
+//резервная копия БД
+procedure BackupDB(FB_Path:string);
+var
+ sr_source:TSearchRec;
+ last_file:TSearchRec;
+ dat1,dat2:TDateTime;
+ datetime:string;
+ backup_count:byte;
+begin
+ if not DirectoryExists(FB_Path+'backup') then CreateDir(FB_Path+'backup');
+ //make backup
+ with  fmMain.FDFBNBackup1 do
+  begin
+    UserName := 'sysdba';
+    Password := 'masterkey';
+    Protocol := ipLocal;
+    Database := FB_Path+'BASE.FDB';
+    DateTimeTostring(datetime,'yyyy-mm-dd hh-nn-ss',now);
+    BackupFile := FB_Path+'backup\BASE '+datetime+'.backup';
+    Backup;
+  end;
+
+  dat2:=strtodate('01.01.2100');
+  backup_count:=0;
+  //backup files count
+  If FindFirst(FB_Path+'backup\'+'*.backup',faAnyFile,sr_source)=0 then
+  repeat
+    if (sr_source.Name <> '..') and (sr_source.Name <> '.') then inc(backup_count);
+  until FindNext(sr_source) <> 0;
+
+  while backup_count>10 do
+  begin
+   dat2:=strtodate('31.12.2100');
+   If FindFirst(FB_Path+'backup\'+'*.backup',faAnyFile,sr_source)=0 then
+   repeat
+    begin
+     dat1:=FileDateToDateTime(sr_source.time);
+     if dat1<dat2 then
+     begin
+      dat2:=dat1;
+      last_file:=sr_source;
+     end;
+    end;
+   until FindNext(sr_source) <> 0;
+   DeleteFile(FB_Path+'backup\'+last_file.Name);
+   dec(backup_count);
+  end;
+
+
+(*
+   If FindFirst(FB_Path+'backup\'+'*.backup',faAnyFile,sr_source)=0 then
+    repeat
+      dat1:=FileDateToDateTime(sr_source.Time);
+      if dat1<dat2 then
+       begin
+        dat2:=dat1;
+        if (MinutesBetween(now,dat2)>20) then DeleteFile(FB_Path+'backup\'+sr_source.Name);
+       end;
+    until FindNext(sr_source) <> 0;
+*)
+
+  // res:= HoursBetween(now,dat2) ;
+   //если удаляем самый страый бекап если он старше месяца
+(*
+      if (MinutesBetween(now,FileDateToDateTime(sr_source.Time))>20) then DeleteFile(FB_Path+'backup\'+sr_source.Name);
+    if backup_count<20 then
+    with  fmMain.FDFBNBackup1 do
+      begin
+        UserName := 'sysdba';
+        Password := 'masterkey';
+        Protocol := ipLocal;
+        Database := FB_Path+'BASE.FDB';
+        DateTimeTostring(datetime,'yyyy-mm-dd hh-nn',now);
+        BackupFile := FB_Path+'backup\BASE '+datetime+'.backup';
+        Backup;
+      end;
+*)
+ FindClose(sr_source);
+end;
+
 
 // инициализация программы
 procedure Init;
@@ -383,6 +465,7 @@ FD_Protocol, FB_Server, FB_Path:string;
 LDocument: IXMLDocument;
 LNodeRoot, LNodeChild, LNode: IXMLNode;
 i: word;
+
 begin
    //читаем файл настроек
     try
@@ -516,6 +599,8 @@ begin
     fmMain.FDC_Base.Connected:=true;
     fmMain.FDT_READ.Options.AutoStart:=false;
     fmMain.FDT_READ.StartTransaction;
+
+    BackupDB(FB_Path);
 
    importGrid:=TStringGrid.Create(fmMain);
 

@@ -13,6 +13,9 @@ type
     Label1: TLabel;
     Edit1: TEdit;
     RadioGroup1: TRadioGroup;
+    GroupBox2: TGroupBox;
+    Button1: TButton;
+    Button2: TButton;
     procedure btBrowseClick(Sender: TObject);
     procedure btReservClick(Sender: TObject);
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);

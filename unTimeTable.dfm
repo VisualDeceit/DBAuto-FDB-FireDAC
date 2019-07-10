@@ -17,7 +17,7 @@ object fmTimeTable: TfmTimeTable
   OnClose = FormClose
   OnDestroy = FormDestroy
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 14
   object Splitter1: TSplitter
     Left = 233
     Top = 38
@@ -52,6 +52,7 @@ object fmTimeTable: TfmTimeTable
     OnDrawColumnCell = DBG_TrainNoDrawColumnCell
     Columns = <
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'ID'
@@ -60,6 +61,7 @@ object fmTimeTable: TfmTimeTable
         Width = 71
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'DIR_KEY'
@@ -68,6 +70,7 @@ object fmTimeTable: TfmTimeTable
         Width = 67
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'NUMBER'
@@ -113,6 +116,7 @@ object fmTimeTable: TfmTimeTable
     OnDrawColumnCell = DBG_TimeTableDrawColumnCell
     Columns = <
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'ID'
@@ -120,6 +124,7 @@ object fmTimeTable: TfmTimeTable
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'TRAIN_KEY'
@@ -127,6 +132,7 @@ object fmTimeTable: TfmTimeTable
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         Footers = <>
@@ -139,6 +145,7 @@ object fmTimeTable: TfmTimeTable
         Width = 179
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'STATION_KEY'
@@ -147,6 +154,7 @@ object fmTimeTable: TfmTimeTable
         Width = 134
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'HOURS'
@@ -155,6 +163,7 @@ object fmTimeTable: TfmTimeTable
         Width = 110
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'MINUTS'
@@ -162,6 +171,7 @@ object fmTimeTable: TfmTimeTable
         Title.Caption = #1055#1088#1080#1073#1099#1090#1080#1077' || '#1052#1080#1085#1091#1090#1099
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'STOP'
@@ -170,6 +180,7 @@ object fmTimeTable: TfmTimeTable
         Width = 106
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'KOORD'
@@ -177,6 +188,7 @@ object fmTimeTable: TfmTimeTable
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'LIN_KOORD'
