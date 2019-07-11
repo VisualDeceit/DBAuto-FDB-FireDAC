@@ -242,6 +242,7 @@ type
 type
   ENoDataException=class(Exception);
   EDataErrorException=class(Exception);
+  EMiscException=class(Exception);
 
 var
   fmMain: TfmMain;
@@ -281,7 +282,8 @@ var
  procedure Init;
  function OpenParadoxDB(impDBpath: string; form: TComponent): TQuery;
  procedure CreateFileDir(var file_name, file_path:String; var put: byte);
-
+ procedure BackupDB;
+ procedure RestoreDB;
 
 implementation
 
@@ -376,15 +378,18 @@ begin
 end;
 
 //резервная копия БД
-procedure BackupDB(FB_Path:string);
+procedure BackupDB;
 var
  sr_source:TSearchRec;
  last_file:TSearchRec;
  dat1,dat2:TDateTime;
  datetime:string;
  backup_count:byte;
+ path:string;
 begin
- if not DirectoryExists(FB_Path+'backup') then CreateDir(FB_Path+'backup');
+ try
+  path:= extractfilepath(application.ExeName)+'\backup\';
+ if not DirectoryExists(path) then CreateDir(path);
  //make backup
  with  fmMain.FDFBNBackup1 do
   begin
@@ -393,22 +398,22 @@ begin
     Protocol := ipLocal;
     Database := FB_Path+'BASE.FDB';
     DateTimeTostring(datetime,'yyyy-mm-dd hh-nn-ss',now);
-    BackupFile := FB_Path+'backup\BASE '+datetime+'.backup';
+    BackupFile := path+'BASE '+datetime+'.nbk';
     Backup;
   end;
 
   dat2:=strtodate('01.01.2100');
   backup_count:=0;
   //backup files count
-  If FindFirst(FB_Path+'backup\'+'*.backup',faAnyFile,sr_source)=0 then
+  If FindFirst(path+'*.nbk',faAnyFile,sr_source)=0 then
   repeat
     if (sr_source.Name <> '..') and (sr_source.Name <> '.') then inc(backup_count);
   until FindNext(sr_source) <> 0;
 
-  while backup_count>10 do
+  while backup_count>20 do
   begin
    dat2:=strtodate('31.12.2100');
-   If FindFirst(FB_Path+'backup\'+'*.backup',faAnyFile,sr_source)=0 then
+   If FindFirst(path+'*.nbk',faAnyFile,sr_source)=0 then
    repeat
     begin
      dat1:=FileDateToDateTime(sr_source.time);
@@ -419,47 +424,69 @@ begin
      end;
     end;
    until FindNext(sr_source) <> 0;
-   DeleteFile(FB_Path+'backup\'+last_file.Name);
+   DeleteFile(path+last_file.Name);
    dec(backup_count);
   end;
+  FindClose(sr_source);
+  except
+  on E:Exception  do
+  begin
+  Application.MessageBox(PWideChar('Ошибка при создании резервной копии БД: '+#13+E.Message),
+                                'Редактор базы данных автоведения',
+                                MB_OK + MB_ICONERROR);
 
+  //   if (MinutesBetween(now,dat2)>20) then DeleteFile(FB_Path+'backup\'+sr_source.Name);
+  FindClose(sr_source);
+  end;
+ end;
+end;
 
-(*
-   If FindFirst(FB_Path+'backup\'+'*.backup',faAnyFile,sr_source)=0 then
-    repeat
-      dat1:=FileDateToDateTime(sr_source.Time);
-      if dat1<dat2 then
-       begin
-        dat2:=dat1;
-        if (MinutesBetween(now,dat2)>20) then DeleteFile(FB_Path+'backup\'+sr_source.Name);
-       end;
-    until FindNext(sr_source) <> 0;
-*)
+//резервная копия БД
+procedure RestoreDB;
 
-  // res:= HoursBetween(now,dat2) ;
-   //если удаляем самый страый бекап если он старше месяца
-(*
-      if (MinutesBetween(now,FileDateToDateTime(sr_source.Time))>20) then DeleteFile(FB_Path+'backup\'+sr_source.Name);
-    if backup_count<20 then
-    with  fmMain.FDFBNBackup1 do
-      begin
-        UserName := 'sysdba';
-        Password := 'masterkey';
-        Protocol := ipLocal;
-        Database := FB_Path+'BASE.FDB';
-        DateTimeTostring(datetime,'yyyy-mm-dd hh-nn',now);
-        BackupFile := FB_Path+'backup\BASE '+datetime+'.backup';
-        Backup;
-      end;
-*)
- FindClose(sr_source);
+begin
+ try
+ //делаем копию рабочей БД
+  fmMain.FDT_READ.Commit;
+  fmMain.FDC_Base.Close;
+  if not RenameFile(PChar(FB_Path+'BASE.FDB'),PChar(FB_Path+'BASE.backup'))
+    then raise Exception.Create('Файл базы данных'+FB_Path+'BASE.FDB занять программой'); ;
+  with  fmMain.FDFBNRestore1 do
+  begin
+    UserName := 'sysdba';
+    Password := 'masterkey';
+    Protocol := ipLocal;
+    Database := FB_Path+'BASE.FDB';
+    BackupFiles.Clear;
+    BackupFiles.Add(backup_file);
+    Restore;
+  end;
+  //удаляем копию
+  DeleteFile(FB_Path+'BASE.backup');
+  fmMain.FDC_Base.Connected:=true;
+  fmMain.FDT_READ.StartTransaction;
+  except
+  on E:Exception  do
+  begin
+   Application.MessageBox(PWideChar('Ошибка при восстановлении резервной копии БД: '+#13+E.Message),
+                                'Редактор базы данных автоведения',
+                                MB_OK + MB_ICONERROR);
+   //восстанавливаем копию файла
+    if fmMain.FDT_READ.Active then fmMain.FDT_READ.Rollback;
+    fmMain.FDC_Base.Close;
+    DeleteFile(FB_Path+'BASE.FDB');
+    RenameFile(FB_Path+'BASE.backup',FB_Path+'BASE.FDB');
+    fmMain.FDC_Base.Connected:=true;
+    fmMain.FDT_READ.StartTransaction;
+  end;
+ end;
 end;
 
 
 // инициализация программы
 procedure Init;
 var
-FD_Protocol, FB_Server, FB_Path:string;
+FD_Protocol, FB_Server:string;
   str:string;
   err_code:Byte;
 LDocument: IXMLDocument;
@@ -599,8 +626,8 @@ begin
     fmMain.FDC_Base.Connected:=true;
     fmMain.FDT_READ.Options.AutoStart:=false;
     fmMain.FDT_READ.StartTransaction;
-
-    BackupDB(FB_Path);
+    //если база открылась, то делаем бекап
+    BackupDB;
 
    importGrid:=TStringGrid.Create(fmMain);
 
@@ -611,7 +638,7 @@ begin
     Application.Terminate;
   end;
 
-  SQL_DIR:=extractfilepath(application.ExeName)+'SQL\';
+  SQL_DIR:=extractfilepath(application.ExeName)+'sql\';
 
   fmMain.TrayIcon1.Visible := True;
   fmMain.TrayIcon1.Animate := True;
@@ -627,9 +654,9 @@ begin
   else  fmMain.TrayIcon1.BalloonHint:='Нет соединения с интернетом';
 
   //папки для работы с PARADOX
-   if not DirectoryExists( ExtractFilePath(ParamStr(0))+ 'NET') then
-        CreateDir(PChar(ExtractFilePath(ParamStr(0))+ 'NET'));
-   Session.NetFileDir := ExtractFilePath(ParamStr(0)) + 'NET';
+   if not DirectoryExists( ExtractFilePath(ParamStr(0))+ 'net') then
+        CreateDir(PChar(ExtractFilePath(ParamStr(0))+ 'net'));
+   Session.NetFileDir := ExtractFilePath(ParamStr(0)) + 'net';
 
 end;
 
@@ -656,37 +683,39 @@ var
   r_count:Byte;
   SQL_str:string;
 begin
-  with fmMain do
-  begin
-   if IBDS_Directions.State in [dsEdit]         then  IBDS_Directions.Post;
-   if  IBDS_Limits.State in [dsEdit]            then  IBDS_Limits.Post;
-   if  IBDS_Trains.State in [dsEdit]            then  IBDS_Trains.Post;
-   if  IBDS_TIME_TABLE.State in [dsEdit]        then  IBDS_TIME_TABLE.Post;
-   if  IBDS_prof.State in [dsEdit]              then  IBDS_prof.Post;
+  (*
+    with fmMain do
+     begin
+      if IBDS_Directions.State in [dsEdit]         then  IBDS_Directions.Post;
+      if  IBDS_Limits.State in [dsEdit]            then  IBDS_Limits.Post;
+      if  IBDS_Trains.State in [dsEdit]            then  IBDS_Trains.Post;
+      if  IBDS_TIME_TABLE.State in [dsEdit]        then  IBDS_TIME_TABLE.Post;
+      if  IBDS_prof.State in [dsEdit]              then  IBDS_prof.Post;
 
 
-   if ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
-   ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=0)) then Way:=2 else Way:=1;
+      if ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
+      ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=0)) then Way:=2 else Way:=1;
 
-   if Way=2 then fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD' else
-                 fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD DESC';
+      if Way=2 then fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD' else
+                    fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD DESC';
 
-  // DS_Refresh(IBDS_Stations);
-   DS_Refresh(IBDS_Trains);
-   DS_Refresh(IBDS_TIME_TABLE);
-   DS_Refresh(IBDS_Limits);
-  // DS_Refresh(IBDS_Light_Signals);
-   DS_Refresh(IBDS_Objects);
-   DS_Refresh(IBDS_prof);
-   DS_Refresh(IBDS_Directions);
+     // DS_Refresh(IBDS_Stations);
+      DS_Refresh(IBDS_Trains);
+      DS_Refresh(IBDS_TIME_TABLE);
+      DS_Refresh(IBDS_Limits);
+     // DS_Refresh(IBDS_Light_Signals);
+      DS_Refresh(IBDS_Objects);
+      DS_Refresh(IBDS_prof);
+      DS_Refresh(IBDS_Directions);
 
-   //if IBDS_DirectionsID.Value=null then Exit;
-  // DIR_ID:=IntToStr(IBDS_DirectionsID.Value);
-//   ibds_time_tableST_name.RefreshLookupList;
-   FillData4Graph;
-   if fmGraph<>nil then fmGraph.PaintBox1.Repaint;
-  // IBDS_Directions.AfterScroll:=IBDS_DirectionsAfterScroll;
-  end;
+      //if IBDS_DirectionsID.Value=null then Exit;
+     // DIR_ID:=IntToStr(IBDS_DirectionsID.Value);
+   //   ibds_time_tableST_name.RefreshLookupList;
+      FillData4Graph;
+      if fmGraph<>nil then fmGraph.PaintBox1.Repaint;
+     // IBDS_Directions.AfterScroll:=IBDS_DirectionsAfterScroll;
+     end;
+ *)
 end;
 
 

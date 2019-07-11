@@ -241,7 +241,6 @@ object fmLimits: TfmLimits
     Top = 184
   end
   object FDQ_LIM: TFDQuery
-    Active = True
     AfterPost = FDQ_LIMAfterPost
     CachedUpdates = True
     MasterSource = fmDirection.DS_DIR

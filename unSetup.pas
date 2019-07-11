@@ -9,18 +9,16 @@ uses
 type
   TfmSetup = class(TForm)
     GroupBox1: TGroupBox;
-    btReserv: TButton;
-    Label1: TLabel;
-    Edit1: TEdit;
-    RadioGroup1: TRadioGroup;
     GroupBox2: TGroupBox;
     Button1: TButton;
     Button2: TButton;
-    procedure btBrowseClick(Sender: TObject);
+    Label1: TLabel;
+    Edit1: TEdit;
+    OpenDialog1: TOpenDialog;
     procedure btReservClick(Sender: TObject);
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure FormCreate(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -32,7 +30,7 @@ var
   procedure Reserv_DB;
 implementation
 
-uses unMain;
+uses unMain, unVars;
 
 {$R *.dfm}
 function DelDir(dir: string): Boolean;
@@ -95,35 +93,29 @@ begin
 
 end;
 
-procedure TfmSetup.btBrowseClick(Sender: TObject);
-begin
-// AdvBrowseDirectory('Укажите папку для резервирования...','',reserv_path,False,False,true,true);
-end;
-
 procedure TfmSetup.btReservClick(Sender: TObject);
 begin
-  reserv_count:=StrToInt(fmSetup.Edit1.Text);
-  Reserv_DB;
-
 end;
 
+//backup
+procedure TfmSetup.Button1Click(Sender: TObject);
+begin
+ BackupDB;
+end;
+
+procedure TfmSetup.Button2Click(Sender: TObject);
+begin
+  if (self.OpenDialog1.Execute) then
+ begin
+  backup_file := self.OpenDialog1.FileName;
+  RestoreDB;
+ end;
+end;
 
 procedure TfmSetup.Edit1KeyPress(Sender: TObject; var Key: Char);
 begin
   if not (key in ['0'..'9',#8]) then key:=chr(0);
 end;
 
-
-procedure TfmSetup.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
- reserv_count:=StrToInt(Edit1.Text);
- reserv_mode:=RadioGroup1.ItemIndex;
- end;
-
-procedure TfmSetup.FormCreate(Sender: TObject);
-begin
-  fmSetup.Edit1.Text:=IntToStr(reserv_count);
-  RadioGroup1.ItemIndex:=reserv_mode;
-end;
 
 end.

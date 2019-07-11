@@ -86,6 +86,9 @@ var
  fl_Koord_Sort:Boolean=False;
  fl_Shift:Boolean=False;
  Shift_source:Byte=0;
+
+ FB_Path, backup_file:string;
+
  const
    OBJ=1;
    SVET=2;
