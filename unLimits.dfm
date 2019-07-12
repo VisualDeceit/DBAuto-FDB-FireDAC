@@ -243,7 +243,7 @@ object fmLimits: TfmLimits
   object FDQ_LIM: TFDQuery
     AfterPost = FDQ_LIMAfterPost
     CachedUpdates = True
-    MasterSource = fmDirection.DS_DIR
+    MasterSource = fmMain.DS_DIR
     MasterFields = 'ID'
     Connection = fmMain.FDC_Base
     Transaction = fmMain.FDT_READ

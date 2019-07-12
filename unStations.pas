@@ -158,7 +158,7 @@ begin
        Close;
        SQL.Clear;
        SQL.LoadFromFile(SQL_DIR+'S_Select.sql');
-       ParamByName('DIR_ID').AsInteger:=fmDirection.FDQ_DIR.FieldByName('ID').Value;
+       ParamByName('DIR_ID').AsInteger:=fmMain.FDQ_DIR.FieldByName('ID').Value;
        if not fl_Shift then  SQL.Add('ORDER BY KOORD') else SQL.Add('ORDER BY LIN_KOORD') ;
        Open;
        r_count:=RecordCount;
@@ -258,10 +258,10 @@ var
   shift_key_old,shift_key:variant;
 begin
  try
-   if ((fmDirection.FDQ_DIR.FieldByName('WAY').Value = 2 )  and (fmDirection.FDQ_DIR.FieldByName('FLAG').Value=1)) or
-   ((fmDirection.FDQ_DIR.FieldByName('WAY').Value=1)  and (fmDirection.FDQ_DIR.FieldByName('FLAG').Value=0)) then Way:=2 else Way:=1;
+   if ((fmMain.FDQ_DIR.FieldByName('WAY').Value = 2 )  and (fmMain.FDQ_DIR.FieldByName('FLAG').Value=1)) or
+   ((fmMain.FDQ_DIR.FieldByName('WAY').Value=1)  and (fmMain.FDQ_DIR.FieldByName('FLAG').Value=0)) then Way:=2 else Way:=1;
 
-  DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+  DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
 
   //создаем временный запрос
       with fmMain.FDQ_TEMP do
@@ -269,7 +269,7 @@ begin
        Close;
        SQL.Clear;
        SQL.LoadFromFile(SQL_DIR+'S_Select.sql');
-       ParamByName('DIR_ID').AsInteger:=fmDirection.FDQ_DIR.FieldByName('ID').Value;
+       ParamByName('DIR_ID').AsInteger:=fmMain.FDQ_DIR.FieldByName('ID').Value;
        if not fl_Shift then  SQL.Add('ORDER BY KOORD') else SQL.Add('ORDER BY LIN_KOORD') ;
        Open;
        r_count:=RecordCount;
@@ -462,7 +462,7 @@ if FDQ_ST.UpdatesPending then
          //замершаем транзакцию
          FDT_WRITE_ST.Commit;
          //обновляем верхний регистр
-         DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+         DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
          with FDCmd do
           begin
              Close;
@@ -552,7 +552,7 @@ procedure TfmStations.ToolButton3Click(Sender: TObject);
 var
  qtimport: TQuery;
 begin
-DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
  if (fmMain.OpenDialog1.Execute) and (DIR_ID<>null) then
  begin
   //открытие таблицы PARADOX

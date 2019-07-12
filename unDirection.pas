@@ -19,15 +19,7 @@ type
     DBG_Direction: TDBGridEh;
     N3: TMenuItem;
     FDT_WRITE_DIR: TFDTransaction;
-    FDQ_DIR: TFDQuery;
     FDUSQL_DIR: TFDUpdateSQL;
-    DS_DIR: TDataSource;
-    FDQ_DIRID: TFDAutoIncField;
-    FDQ_DIRFNAME: TStringField;
-    FDQ_DIRCODE: TIntegerField;
-    FDQ_DIRWAY: TIntegerField;
-    FDQ_DIRFLAG: TSmallintField;
-    FDQ_DIRRAIL_KEY: TIntegerField;
     DBNavigator1: TDBNavigator;
     procedure DBG_DirectionDrawColumnCell(Sender: TObject;
       const Rect: TRect; DataCol: Integer; Column: TColumnEh;
@@ -62,7 +54,7 @@ procedure TfmDirection.DBG_DirectionCellMouseClick(Grid: TCustomGridEh;
 begin
  //fmMain.StatusBar1.Panels[5].Text:= fmMain.IBDS_Directions.fieldbyname('ID').AsString;
  //fmMain.DBLookupComboboxEh1.KeyValue:=fmMain.IBDS_Directions.fieldbyname('ID').AsVariant;
-
+ fmMain.Edit1.Text:= fmMain.FDQ_DIR.FieldByName('FName').AsString;
 end;
 
 procedure TfmDirection.DBG_DirectionDrawColumnCell(Sender: TObject;
@@ -75,16 +67,16 @@ end;
 procedure TfmDirection.FDQ_DIRAfterPost(DataSet: TDataSet);
 begin
     //есть изменения в очереди
-    if FDQ_DIR.UpdatesPending then
+    if fmMain.FDQ_DIR.UpdatesPending then
     begin
      //старт транзакции на запись
       FDT_WRITE_DIR.StartTransaction;
      //применяем изменения
      try
-      if (FDQ_DIR.ApplyUpdates = 0) then
+      if (fmMain.FDQ_DIR.ApplyUpdates = 0) then
       begin
        //очищаем журнал
-       FDQ_DIR.CommitUpdates;
+       fmMain.FDQ_DIR.CommitUpdates;
        //замершаем транзакцию
        FDT_WRITE_DIR.Commit;
       end else
@@ -93,8 +85,8 @@ begin
         on E: Exception do
         begin
           if FDT_WRITE_DIR.Active then FDT_WRITE_DIR.Rollback;
-          FDQ_DIR.CommitUpdates;
-          FDQ_DIR.Refresh;
+          fmMain.FDQ_DIR.CommitUpdates;
+          fmMain.FDQ_DIR.Refresh;
           Application.ShowException(E);
         end;
       end;
@@ -128,16 +120,16 @@ begin
 
     LDocument.SaveToFile(extractfilepath(application.ExeName)+'Setup.xml');
     LDocument.Active:=false;
-    if FDQ_DIR.UpdatesPending then
+    if fmMain.FDQ_DIR.UpdatesPending then
       begin
        //старт транзакции на запись
         FDT_WRITE_DIR.StartTransaction;
        //применяем изменения
        try
-        if (FDQ_DIR.ApplyUpdates = 0) then
+        if (fmMain.FDQ_DIR.ApplyUpdates = 0) then
         begin
          //очищаем журнал
-         FDQ_DIR.CommitUpdates;
+         fmMain.FDQ_DIR.CommitUpdates;
          //замершаем транзакцию
          FDT_WRITE_DIR.Commit;
         end else
@@ -146,23 +138,25 @@ begin
           on E: Exception do
           begin
             if FDT_WRITE_DIR.Active then FDT_WRITE_DIR.Rollback;
-            FDQ_DIR.CommitUpdates;
-            FDQ_DIR.Refresh;
+            fmMain.FDQ_DIR.CommitUpdates;
+            fmMain.FDQ_DIR.Refresh;
             Application.ShowException(E);
           end;
         end;
     end;
     // закрываем набор данных
-    FDQ_DIR.Close;
+    //FDQ_DIR.Close;
+    fmMain.tbDirections.Down:=False;
   finally
 
   end;
   Action := caFree;
+  fmMain.tbDirections.Down:=False;
 end;
 
 procedure TfmDirection.N1Click(Sender: TObject);
 begin
- fmMain.IBDS_Directions.Insert;
+// fmMain.IBDS_Directions.Insert;
 end;
 
 procedure TfmDirection.N2Click(Sender: TObject);
@@ -244,7 +238,7 @@ begin
   begin
     FDT_WRITE_DIR.StartTransaction;
     try
-      FDQ_DIR.Delete;
+      fmMain.FDQ_DIR.Delete;
       FDT_WRITE_DIR.Commit;
     except
       on E: Exception do

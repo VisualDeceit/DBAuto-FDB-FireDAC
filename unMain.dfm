@@ -46,39 +46,51 @@ object fmMain: TfmMain
     Left = 0
     Top = 0
     Width = 1370
-    Height = 44
+    Height = 43
+    AutoSize = True
     Bands = <
+      item
+        Control = Edit1
+        HorizontalOnly = True
+        ImageIndex = -1
+        MinHeight = 19
+        MinWidth = -1
+        Width = 227
+      end
       item
         Break = False
         Control = ToolBar1
         HorizontalOnly = True
         ImageIndex = -1
-        MinHeight = 40
-        MinWidth = 588
-        Width = 666
+        MinHeight = 39
+        MinWidth = -1
+        Width = 602
       end
       item
         Break = False
         Control = ToolBar2
         HorizontalOnly = True
         ImageIndex = -1
-        MinHeight = 40
+        MinHeight = 39
         MinWidth = -1
-        Width = 694
-      end
-      item
-        ImageIndex = -1
-        Width = 1364
+        Width = 527
       end>
     Color = clBtnFace
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Arial'
+    Font.Style = []
     ParentColor = False
+    ParentFont = False
     object ToolBar1: TToolBar
-      Left = 11
+      Left = 242
       Top = 0
-      Width = 653
-      Height = 40
-      Align = alNone
-      ButtonHeight = 48
+      Width = 585
+      Height = 39
+      Align = alLeft
+      AutoSize = True
+      ButtonHeight = 38
       ButtonWidth = 39
       Caption = 'ToolBar1'
       Color = clBtnFace
@@ -99,21 +111,10 @@ object fmMain: TfmMain
         Style = tbsCheck
         OnClick = tbDirectionsClick
       end
-      object ToolButton1: TToolButton
+      object tbStations: TToolButton
         Left = 39
         Top = 0
-        Width = 10
-        Caption = 'ToolButton1'
-        ImageIndex = 4
-        ParentShowHint = False
-        ShowHint = True
-        Style = tbsDivider
-      end
-      object tbStations: TToolButton
-        Left = 49
-        Top = 0
         Hint = #1057#1090#1072#1085#1094#1080#1080
-        AutoSize = True
         Caption = 'tbStations'
         ImageIndex = 1
         ParentShowHint = False
@@ -122,7 +123,7 @@ object fmMain: TfmMain
         OnClick = tbStationsClick
       end
       object tbTimetable: TToolButton
-        Left = 88
+        Left = 78
         Top = 0
         Hint = #1056#1072#1089#1087#1080#1089#1072#1085#1080#1103
         Caption = 'tbTimetable'
@@ -133,10 +134,9 @@ object fmMain: TfmMain
         OnClick = tbTimetableClick
       end
       object tbLimits: TToolButton
-        Left = 127
+        Left = 117
         Top = 0
         Hint = #1054#1088#1075#1072#1085#1080#1095#1077#1085#1080#1103' '#1089#1082#1086#1088#1086#1089#1090#1080
-        AutoSize = True
         Caption = #1054#1088#1075#1072#1085#1080#1095#1077#1085#1080#1103' '#1089#1082#1086#1088#1086#1089#1090#1080
         ImageIndex = 28
         ParentShowHint = False
@@ -145,10 +145,9 @@ object fmMain: TfmMain
         OnClick = tbLimitsClick
       end
       object tbSvet: TToolButton
-        Left = 166
+        Left = 156
         Top = 0
         Hint = #1057#1074#1077#1090#1086#1092#1086#1088#1099
-        AutoSize = True
         Caption = 'tbSvet'
         ImageIndex = 14
         ParentShowHint = False
@@ -157,10 +156,9 @@ object fmMain: TfmMain
         OnClick = tbSvetClick
       end
       object tbPrep: TToolButton
-        Left = 205
+        Left = 195
         Top = 0
         Hint = #1054#1073#1098#1077#1082#1090#1099' '#1087#1091#1090#1080
-        AutoSize = True
         Caption = 'tbPrep'
         ImageIndex = 15
         ParentShowHint = False
@@ -168,19 +166,8 @@ object fmMain: TfmMain
         Style = tbsCheck
         OnClick = tbPrepClick
       end
-      object tbProf: TToolButton
-        Left = 244
-        Top = 0
-        Hint = #1055#1088#1086#1092#1080#1083#1100
-        Caption = 'tbProf'
-        ImageIndex = 30
-        ParentShowHint = False
-        ShowHint = True
-        Style = tbsCheck
-        OnClick = tbProfClick
-      end
       object tbShift: TToolButton
-        Left = 283
+        Left = 234
         Top = 0
         Hint = #1059#1095#1072#1089#1090#1082#1080
         Caption = 'tbShift'
@@ -191,10 +178,9 @@ object fmMain: TfmMain
         OnClick = tbShiftClick
       end
       object tbImport: TToolButton
-        Left = 322
+        Left = 273
         Top = 0
         Hint = #1048#1084#1087#1086#1088#1090' '#1080#1079' Excel'
-        AutoSize = True
         Caption = 'tbImport'
         ImageIndex = 4
         ParentShowHint = False
@@ -203,7 +189,7 @@ object fmMain: TfmMain
         OnClick = tbImportClick
       end
       object tbGraph: TToolButton
-        Left = 361
+        Left = 312
         Top = 0
         Hint = #1043#1088#1072#1092#1080#1082
         Caption = 'tbGraph'
@@ -214,10 +200,9 @@ object fmMain: TfmMain
         OnClick = tbGraphClick
       end
       object tbFolder: TToolButton
-        Left = 400
+        Left = 351
         Top = 0
         Hint = #1054#1090#1082#1088#1099#1090#1100' '#1087#1072#1087#1082#1091' '#1089' '#1092#1072#1081#1083#1072#1084#1080
-        AutoSize = True
         Caption = 'tbFolder'
         ImageIndex = 2
         ParentShowHint = False
@@ -225,61 +210,57 @@ object fmMain: TfmMain
         OnClick = tbFolderClick
       end
       object tbRefresh: TToolButton
-        Left = 439
+        Left = 390
         Top = 0
         Action = Refresh
         ImageIndex = 3
         ParentShowHint = False
         ShowHint = True
       end
-      object ToolButton7: TToolButton
-        Left = 478
+      object tbProf: TToolButton
+        Left = 429
+        Top = 0
+        Hint = #1055#1088#1086#1092#1080#1083#1100
+        Caption = 'tbProf'
+        ImageIndex = 30
+        ParentShowHint = False
+        ShowHint = True
+        Style = tbsCheck
+        OnClick = tbProfClick
+      end
+      object tbSetup: TToolButton
+        Left = 468
         Top = 0
         Hint = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-        Caption = 'ToolButton7'
+        Caption = 'tbSetup'
         ImageIndex = 24
         ParentShowHint = False
         ShowHint = True
-        OnClick = ToolButton7Click
-      end
-      object ToolButton8: TToolButton
-        Left = 517
-        Top = 0
-        Width = 10
-        Caption = 'ToolButton8'
-        ImageIndex = 26
-        Style = tbsDivider
+        OnClick = tbSetupClick
       end
       object btn1: TToolButton
-        Left = 527
+        Left = 507
         Top = 0
         Caption = 'btn1'
         ImageIndex = 33
         OnClick = btn1Click
       end
-      object ToolButton11: TToolButton
-        Left = 566
+      object tbAbout: TToolButton
+        Left = 546
         Top = 0
-        Caption = 'ToolButton11'
+        Caption = 'tbAbout'
         ImageIndex = 27
-        OnClick = ToolButton11Click
-      end
-      object ToolButton9: TToolButton
-        Left = 605
-        Top = 0
-        Width = 10
-        Caption = 'ToolButton9'
-        ImageIndex = 23
-        Style = tbsDivider
+        OnClick = tbAboutClick
       end
     end
     object ToolBar2: TToolBar
-      Left = 681
+      Left = 848
       Top = 0
-      Width = 685
-      Height = 40
-      Align = alNone
-      ButtonHeight = 38
+      Width = 195
+      Height = 39
+      Align = alLeft
+      AutoSize = True
+      ButtonHeight = 39
       ButtonWidth = 39
       Caption = 'ToolBar1'
       Color = clBtnFace
@@ -320,6 +301,19 @@ object fmMain: TfmMain
         Action = WindowCloseAll
         ImageIndex = 23
       end
+    end
+    object Edit1: TEdit
+      Left = 11
+      Top = 10
+      Width = 214
+      Height = 19
+      BevelEdges = []
+      BevelInner = bvNone
+      BevelOuter = bvNone
+      BorderStyle = bsNone
+      ReadOnly = True
+      TabOrder = 2
+      Text = #1042#1099#1073#1077#1088#1080#1090#1077' '#1085#1072#1087#1088#1072#1074#1083#1077#1085#1080#1077'...'
     end
   end
   object ImageList1: TImageList
@@ -5939,8 +5933,8 @@ object fmMain: TfmMain
     ParamCheck = True
     UniDirectional = False
     DataSource = dsDirections
-    Left = 408
-    Top = 240
+    Left = 352
+    Top = 232
     object IBDS_LimitsID: TIntegerField
       FieldName = 'ID'
       Origin = '"LIMITS"."ID"'
@@ -6033,8 +6027,8 @@ object fmMain: TfmMain
     UniDirectional = False
     UpdateObject = IBUPD_Trains
     DataSource = dsDirections
-    Left = 496
-    Top = 240
+    Left = 416
+    Top = 232
     object IBDS_TrainsID: TIntegerField
       FieldName = 'ID'
       Origin = '"TRAINS"."ID"'
@@ -6073,8 +6067,8 @@ object fmMain: TfmMain
     UniDirectional = False
     UpdateObject = IBUPD_Time_Table
     DataSource = dsTrains
-    Left = 576
-    Top = 240
+    Left = 480
+    Top = 232
     object IBDS_TIME_TABLEID: TIntegerField
       FieldName = 'ID'
       Origin = '"TIME_TABLE"."ID"'
@@ -6234,8 +6228,8 @@ object fmMain: TfmMain
     UniDirectional = False
     UpdateObject = IBUPD_Objects
     DataSource = dsDirections
-    Left = 664
-    Top = 240
+    Left = 560
+    Top = 232
     object IBDS_ObjectsID: TIntegerField
       FieldName = 'ID'
       Origin = '"OBJECTS"."ID"'
@@ -6301,8 +6295,8 @@ object fmMain: TfmMain
       'FROM OBJECTS_INFO')
     ParamCheck = True
     UniDirectional = False
-    Left = 760
-    Top = 240
+    Left = 648
+    Top = 232
     object IBDS_OBJECTS_INFOID: TIntegerField
       FieldName = 'ID'
       Origin = '"OBJECTS_INFO"."ID"'
@@ -6508,8 +6502,8 @@ object fmMain: TfmMain
     UniDirectional = False
     UpdateObject = IBUPD_PROF
     DataSource = dsDirections
-    Left = 848
-    Top = 240
+    Left = 752
+    Top = 232
     object IBDS_profID: TIntegerField
       FieldName = 'ID'
       Origin = '"PROFILE"."ID"'
@@ -6603,18 +6597,19 @@ object fmMain: TfmMain
       'DriverID=FB')
     FetchOptions.AssignedValues = [evAutoClose]
     FetchOptions.AutoClose = False
-    Left = 976
+    Connected = True
+    Left = 912
     Top = 304
   end
   object FDPhysFBDriverLink1: TFDPhysFBDriverLink
-    Left = 976
+    Left = 912
     Top = 256
   end
   object FDT_READ: TFDTransaction
     Options.ReadOnly = True
     Options.AutoStop = False
     Connection = FDC_Base
-    Left = 976
+    Left = 912
     Top = 352
   end
   object FDQ_TEMP: TFDQuery
@@ -6626,7 +6621,7 @@ object fmMain: TfmMain
     UpdateOptions.EnableDelete = False
     UpdateOptions.EnableInsert = False
     UpdateOptions.EnableUpdate = False
-    Left = 976
+    Left = 912
     Top = 408
   end
   object dsStations: TDataSource
@@ -6826,12 +6821,64 @@ object fmMain: TfmMain
     Password = 'masterkey'
     Database = 'D:\BASE\BASE.fdb'
     BackupFile = 'D:\BASE\BASE.backup'
-    Left = 976
+    Left = 912
     Top = 480
   end
   object FDFBNRestore1: TFDFBNRestore
     DriverLink = FDPhysFBDriverLink1
-    Left = 976
+    Left = 912
     Top = 536
+  end
+  object FDQ_DIR: TFDQuery
+    CachedUpdates = True
+    Connection = FDC_Base
+    Transaction = FDT_READ
+    UpdateTransaction = fmDirection.FDT_WRITE_DIR
+    FetchOptions.AssignedValues = [evItems]
+    FetchOptions.Items = [fiBlobs, fiDetails]
+    UpdateOptions.AssignedValues = [uvEDelete, uvEInsert, uvEUpdate, uvUpdateChngFields, uvFetchGeneratorsPoint, uvGeneratorName, uvCheckRequired]
+    UpdateOptions.FetchGeneratorsPoint = gpNone
+    UpdateOptions.GeneratorName = 'GEN_DIRECTIONS_ID'
+    UpdateOptions.AutoIncFields = 'ID'
+    UpdateObject = fmDirection.FDUSQL_DIR
+    SQL.Strings = (
+      'select * from DIRECTIONS'
+      'ORDER by CODE, WAY')
+    Left = 960
+    Top = 304
+    object FDQ_DIRID: TFDAutoIncField
+      FieldName = 'ID'
+      Origin = 'ID'
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      IdentityInsert = True
+    end
+    object FDQ_DIRFNAME: TStringField
+      FieldName = 'FNAME'
+      Origin = 'FNAME'
+      Size = 25
+    end
+    object FDQ_DIRCODE: TIntegerField
+      FieldName = 'CODE'
+      Origin = 'CODE'
+    end
+    object FDQ_DIRWAY: TIntegerField
+      FieldName = 'WAY'
+      Origin = 'WAY'
+    end
+    object FDQ_DIRFLAG: TSmallintField
+      DisplayLabel = #1055#1088#1072#1074#1080#1083#1100#1085#1099#1081
+      FieldName = 'FLAG'
+      Origin = 'FLAG'
+      Required = True
+    end
+    object FDQ_DIRRAIL_KEY: TIntegerField
+      FieldName = 'RAIL_KEY'
+      Origin = 'RAIL_KEY'
+    end
+  end
+  object DS_DIR: TDataSource
+    DataSet = FDQ_DIR
+    Left = 1010
+    Top = 304
   end
 end

@@ -79,23 +79,8 @@ Coordinates=10,586,141,58
 [fmMain.dsDirections]
 Coordinates=535,859,131,36
 
-[FDQ_DIRRAIL_KEY]
-Coordinates=766,628,131,36
-
-[FDQ_DIRFNAME]
-Coordinates=766,683,115,36
-
 [FDT_WRITE_DIR]
 Coordinates=766,738,116,36
-
-[FDQ_DIRWAY]
-Coordinates=766,793,99,36
-
-[DS_DIR]
-Coordinates=466,1127,61,36
-
-[FDQ_DIRID]
-Coordinates=766,848,83,36
 
 [FDUSQL_DIR]
 Coordinates=766,903,95,36
@@ -103,19 +88,10 @@ Coordinates=766,903,95,36
 [(TMenuItem)]
 Coordinates=14,943,88,36
 
-[FDQ_DIR]
-Coordinates=10,386,70,190
-
 [DBNavigator1]
 Coordinates=293,586,94,58
 Visible=True
 
-[FDQ_DIRFLAG]
-Coordinates=979,56,104,36
-
-[FDQ_DIRCODE]
-Coordinates=979,111,107,36
-
 []
-Coordinates=979,1,91,36
+Coordinates=466,1127,61,36
 

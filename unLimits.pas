@@ -190,7 +190,7 @@ var
 label L1;
 begin
  try
-  DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+  DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
   if  (FDQ_LIM.FieldByName('ID').Value=null)  then
   raise ENoDataException.Create('Нет данных для создания файла');
   //считываем данные во временный Датасет
@@ -199,7 +199,7 @@ begin
    Close;
    SQL.Clear;
    SQL.LoadFromFile(SQL_DIR+'L_Select.sql');
-   ParamByName('DIR_ID').AsInteger:=fmDirection.FDQ_DIR.FieldByName('ID').Value;
+   ParamByName('DIR_ID').AsInteger:=fmMain.FDQ_DIR.FieldByName('ID').Value;
    if not fl_Shift then  SQL.Add('ORDER BY L.beg_km, L.beg_pk') else SQL.Add('ORDER BY LIN_KOORD') ;
    Open;
    r_count:=RecordCount;
@@ -295,7 +295,7 @@ begin
                             'Редактор базы данных автоведения',
                             MB_YESNO + MB_ICONWARNING + MB_TOPMOST) = IDYES then
   begin
-     DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+     DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
     with FDCmd do
     begin
        Close;
@@ -519,7 +519,7 @@ begin
        Close;
        SQL.Clear;
        SQL.LoadFromFile(SQL_DIR+'L_Select.sql');
-       ParamByName('DIR_ID').AsInteger:=fmDirection.FDQ_DIR.FieldByName('ID').Value;
+       ParamByName('DIR_ID').AsInteger:=fmMain.FDQ_DIR.FieldByName('ID').Value;
        if not fl_Shift then  SQL.Add('ORDER BY L.beg_km, L.beg_pk') else SQL.Add('ORDER BY LIN_KOORD') ;
        Open;
        r_count:=RecordCount;
@@ -577,7 +577,7 @@ var
 i:word; s:string;
 qtimport: TQuery;
 begin
- DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+ DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
  if (fmMain.OpenDialog1.Execute) and (DIR_ID<>null) then
  begin
  //открытие таблицы PARADOX

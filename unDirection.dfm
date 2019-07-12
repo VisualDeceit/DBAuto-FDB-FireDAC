@@ -34,7 +34,7 @@ object fmDirection: TfmDirection
       item
         ColumnName = 'Column_2_CODE'
       end>
-    DataSource = DS_DIR
+    DataSource = fmMain.DS_DIR
     DynProps = <>
     Flat = True
     Font.Charset = RUSSIAN_CHARSET
@@ -57,6 +57,7 @@ object fmDirection: TfmDirection
     OnDrawColumnCell = DBG_DirectionDrawColumnCell
     Columns = <
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'ID'
@@ -64,6 +65,7 @@ object fmDirection: TfmDirection
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'FNAME'
@@ -72,6 +74,7 @@ object fmDirection: TfmDirection
         Width = 192
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'CODE'
@@ -80,6 +83,7 @@ object fmDirection: TfmDirection
         Width = 56
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'WAY'
@@ -88,6 +92,7 @@ object fmDirection: TfmDirection
         Width = 65
       end
       item
+        CellButtons = <>
         Checkboxes = True
         DblClickNextVal = True
         DynProps = <>
@@ -99,6 +104,7 @@ object fmDirection: TfmDirection
         Width = 74
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'RAIL_NAME'
@@ -119,7 +125,6 @@ object fmDirection: TfmDirection
     Margins.Top = 10
     Margins.Right = 1
     Margins.Bottom = 10
-    DataSource = DS_DIR
     Align = alTop
     TabOrder = 1
   end
@@ -206,54 +211,6 @@ object fmDirection: TfmDirection
     Left = 375
     Top = 200
   end
-  object FDQ_DIR: TFDQuery
-    AfterPost = FDQ_DIRAfterPost
-    CachedUpdates = True
-    Connection = fmMain.FDC_Base
-    Transaction = fmMain.FDT_READ
-    UpdateTransaction = FDT_WRITE_DIR
-    FetchOptions.AssignedValues = [evItems]
-    FetchOptions.Items = [fiBlobs, fiDetails]
-    UpdateOptions.AssignedValues = [uvEDelete, uvEInsert, uvEUpdate, uvUpdateChngFields, uvFetchGeneratorsPoint, uvGeneratorName, uvCheckRequired]
-    UpdateOptions.FetchGeneratorsPoint = gpNone
-    UpdateOptions.GeneratorName = 'GEN_DIRECTIONS_ID'
-    UpdateOptions.AutoIncFields = 'ID'
-    UpdateObject = FDUSQL_DIR
-    SQL.Strings = (
-      'select * from DIRECTIONS'
-      'ORDER by CODE, WAY')
-    Left = 376
-    Top = 136
-    object FDQ_DIRID: TFDAutoIncField
-      FieldName = 'ID'
-      Origin = 'ID'
-      ProviderFlags = [pfInUpdate, pfInWhere]
-      IdentityInsert = True
-    end
-    object FDQ_DIRFNAME: TStringField
-      FieldName = 'FNAME'
-      Origin = 'FNAME'
-      Size = 25
-    end
-    object FDQ_DIRCODE: TIntegerField
-      FieldName = 'CODE'
-      Origin = 'CODE'
-    end
-    object FDQ_DIRWAY: TIntegerField
-      FieldName = 'WAY'
-      Origin = 'WAY'
-    end
-    object FDQ_DIRFLAG: TSmallintField
-      DisplayLabel = #1055#1088#1072#1074#1080#1083#1100#1085#1099#1081
-      FieldName = 'FLAG'
-      Origin = 'FLAG'
-      Required = True
-    end
-    object FDQ_DIRRAIL_KEY: TIntegerField
-      FieldName = 'RAIL_KEY'
-      Origin = 'RAIL_KEY'
-    end
-  end
   object FDUSQL_DIR: TFDUpdateSQL
     Connection = fmMain.FDC_Base
     InsertSQL.Strings = (
@@ -277,11 +234,6 @@ object fmDirection: TfmDirection
       'FROM DIRECTIONS'
       'WHERE ID = :ID')
     Left = 440
-    Top = 136
-  end
-  object DS_DIR: TDataSource
-    DataSet = FDQ_DIR
-    Left = 320
     Top = 136
   end
 end

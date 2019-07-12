@@ -45,7 +45,6 @@ type
     CoolBar1: TCoolBar;
     ToolBar1: TToolBar;
     tbDirections: TToolButton;
-    ToolButton1: TToolButton;
     tbStations: TToolButton;
     tbTimetable: TToolButton;
     tbLimits: TToolButton;
@@ -53,7 +52,6 @@ type
     tbPrep: TToolButton;
     tbImport: TToolButton;
     tbFolder: TToolButton;
-    ToolButton9: TToolButton;
     tbRefresh: TToolButton;
     OpenDialog1: TOpenDialog;
     ToolBar2: TToolBar;
@@ -63,11 +61,10 @@ type
     WindowCloseAll: TAction;
     ToolButton5: TToolButton;
     ToolButton6: TToolButton;
-    ToolButton7: TToolButton;
+    tbSetup: TToolButton;
     tbGraph: TToolButton;
-    ToolButton8: TToolButton;
     tbShift: TToolButton;
-    ToolButton11: TToolButton;
+    tbAbout: TToolButton;
     tbProf: TToolButton;
     IBDB_Main: TIBDatabase;
     dsDirections: TDataSource;
@@ -193,6 +190,15 @@ type
     LargeintField10: TLargeintField;
     FDFBNBackup1: TFDFBNBackup;
     FDFBNRestore1: TFDFBNRestore;
+    Edit1: TEdit;
+    FDQ_DIR: TFDQuery;
+    FDQ_DIRID: TFDAutoIncField;
+    FDQ_DIRFNAME: TStringField;
+    FDQ_DIRCODE: TIntegerField;
+    FDQ_DIRWAY: TIntegerField;
+    FDQ_DIRFLAG: TSmallintField;
+    FDQ_DIRRAIL_KEY: TIntegerField;
+    DS_DIR: TDataSource;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure CreateParams(var Params: TCreateParams); override;
     procedure tbDirectionsClick(Sender: TObject);
@@ -206,10 +212,10 @@ type
     procedure tbSvetClick(Sender: TObject);
     procedure WindowCloseAllExecute(Sender: TObject);
     procedure WindowCloseAllUpdate(Sender: TObject);
-    procedure ToolButton7Click(Sender: TObject);
+    procedure tbSetupClick(Sender: TObject);
     procedure tbGraphClick(Sender: TObject);
     procedure tbShiftClick(Sender: TObject);
-    procedure ToolButton11Click(Sender: TObject);
+    procedure tbAboutClick(Sender: TObject);
     procedure tbProfClick(Sender: TObject);
     procedure btn1Click(Sender: TObject);
     procedure IBDS_LimitsBeforePost(DataSet: TDataSet);
@@ -366,14 +372,14 @@ end;
 var
  dir: word;
 begin
-   dir:=fmDirection.FDQ_DIR.FieldByName('Code').Value;
-   put:=fmDirection.FDQ_DIR.FieldByName('WAY').Value;
+   dir:=fmMain.FDQ_DIR.FieldByName('Code').Value;
+   put:=fmMain.FDQ_DIR.FieldByName('WAY').Value;
    file_name:='';
    if dir<10  then file_name:='0'+IntToStr(dir) else  file_name:=IntToStr(dir);
    file_name:=file_name+'p'+inttostr(put);
    file_path:=extractfilepath(application.ExeName)+'files\'+
-                             fmDirection.FDQ_DIR.FieldByName('Code').AsString+' '+
-                             fmDirection.FDQ_DIR.FieldByName('FName').AsString;
+                             fmMain.FDQ_DIR.FieldByName('Code').AsString+' '+
+                             fmMain.FDQ_DIR.FieldByName('FName').AsString;
    if not DirectoryExists(file_path) then  CreateDir(file_path);
 end;
 
@@ -410,7 +416,7 @@ begin
     if (sr_source.Name <> '..') and (sr_source.Name <> '.') then inc(backup_count);
   until FindNext(sr_source) <> 0;
 
-  while backup_count>20 do
+  while backup_count>10 do
   begin
    dat2:=strtodate('31.12.2100');
    If FindFirst(path+'*.nbk',faAnyFile,sr_source)=0 then
@@ -1039,7 +1045,7 @@ begin
        fmDirection.Left:=DirSettings.Left;
        fmDirection.Top:=DirSettings.Top;
         //открываем набор данных
-        fmDirection.FDQ_DIR.Open;
+        fmMain.FDQ_DIR.Open;
   end;
  end   else fmDirection.Close;
 end;
@@ -1049,8 +1055,8 @@ var
   str:string;
 begin
  str:=extractfilepath(application.ExeName)+'files\'+
-                             fmDirection.FDQ_DIR.FieldByName('Code').AsString+' '+
-                             fmDirection.FDQ_DIR.FieldByName('FName').AsString;
+                             fmMain.FDQ_DIR.FieldByName('Code').AsString+' '+
+                             fmMain.FDQ_DIR.FieldByName('FName').AsString;
  if not DirectoryExists(str) then  CreateDir(str);
  ShellExecute(0, 'open', PWideChar(str), nil, nil, SW_SHOWNORMAL);
 end;
@@ -1199,7 +1205,7 @@ begin
   if not flag then fmMain.ToolButton6.Enabled:=False else fmMain.ToolButton6.Enabled:=True;
 end;
 
-procedure TfmMain.ToolButton7Click(Sender: TObject);
+procedure TfmMain.tbSetupClick(Sender: TObject);
 begin
  fmSetup.ShowModal;
 end;
@@ -1328,7 +1334,7 @@ begin
   end else fmshift.Close;
 end;
 
-procedure TfmMain.ToolButton11Click(Sender: TObject);
+procedure TfmMain.tbAboutClick(Sender: TObject);
 begin
  fmAbout.Show;
 end;

@@ -302,7 +302,7 @@ object fmStations: TfmStations
     AfterPost = FDQ_STAfterPost
     AfterDelete = FDQ_STAfterDelete
     CachedUpdates = True
-    MasterSource = fmDirection.DS_DIR
+    MasterSource = fmMain.DS_DIR
     MasterFields = 'ID'
     Connection = fmMain.FDC_Base
     Transaction = fmMain.FDT_READ

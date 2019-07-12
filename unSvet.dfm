@@ -179,7 +179,7 @@ object fmSvet: TfmSvet
     AfterPost = FDQ_SVAfterPost
     AfterDelete = FDQ_SVAfterDelete
     CachedUpdates = True
-    MasterSource = fmDirection.DS_DIR
+    MasterSource = fmMain.DS_DIR
     MasterFields = 'ID'
     Connection = fmMain.FDC_Base
     Transaction = fmMain.FDT_READ

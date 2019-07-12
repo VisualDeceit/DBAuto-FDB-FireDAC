@@ -192,7 +192,7 @@ var
 label L1;
 begin
  try
-  DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+  DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
   if  (FDQ_SV.FieldByName('ID').Value=null)  then
   raise ENoDataException.Create('Нет данных для создания файла');
   //считываем данные во временный Датасет
@@ -201,7 +201,7 @@ begin
    Close;
    SQL.Clear;
    SQL.LoadFromFile(SQL_DIR+'LS_Select.sql');
-   ParamByName('DIR_ID').AsInteger:=fmDirection.FDQ_DIR.FieldByName('ID').Value;
+   ParamByName('DIR_ID').AsInteger:=fmMain.FDQ_DIR.FieldByName('ID').Value;
    if not fl_Shift then  SQL.Add('ORDER BY LS.KOORD') else SQL.Add('ORDER BY LIN_KOORD') ;
    Open;
    r_count:=RecordCount;
@@ -214,14 +214,14 @@ begin
     end;
   end;
    //создаем папку для файлов
-   dir:=fmDirection.FDQ_DIR.FieldByName('Code').Value;
-   put:=fmDirection.FDQ_DIR.FieldByName('WAY').Value;
+   dir:=fmMain.FDQ_DIR.FieldByName('Code').Value;
+   put:=fmMain.FDQ_DIR.FieldByName('WAY').Value;
    file_name:='';
    if dir<10  then file_name:='0'+IntToStr(dir) else  file_name:=IntToStr(dir);
    file_name:=file_name+'p'+inttostr(put);
    str:=extractfilepath(application.ExeName)+'files\'+
-                             fmDirection.FDQ_DIR.FieldByName('Code').AsString+' '+
-                             fmDirection.FDQ_DIR.FieldByName('FName').AsString;
+                             fmMain.FDQ_DIR.FieldByName('Code').AsString+' '+
+                             fmMain.FDQ_DIR.FieldByName('FName').AsString;
    if not DirectoryExists(str) then  CreateDir(str);
    if FileExists(str+'\'+file_name+'.svt')=True then
    begin
@@ -296,7 +296,7 @@ procedure TfmSvet.ImportFromDBClick(Sender: TObject);
 var
   qtimport: TQuery;
 begin
- DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+ DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
  if (fmMain.OpenDialog1.Execute) and (DIR_ID<>null) then
  begin
   //открытие таблицы PARADOX
@@ -350,7 +350,7 @@ begin
                             'Редактор базы данных автоведения',
                             MB_YESNO + MB_ICONWARNING + MB_TOPMOST) = IDYES then
   begin
-     DIR_ID:=fmDirection.FDQ_DIR.FieldByName('ID').AsString;
+     DIR_ID:=fmMain.FDQ_DIR.FieldByName('ID').AsString;
     with FDCmd do
     begin
        Close;
