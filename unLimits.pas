@@ -91,30 +91,8 @@ end;
 
 procedure TfmLimits.FDQ_LIMAfterPost(DataSet: TDataSet);
 begin
- if FDQ_LIM.UpdatesPending then
-      begin
-       //старт транзакции на запись
-        FDT_WRITE_LIM.StartTransaction;
-       //применяем изменения
-       try
-        if (FDQ_LIM.ApplyUpdates = 0) then
-        begin
-         //очищаем журнал
-         FDQ_LIM.CommitUpdates;
-         //завершаем транзакцию
-         FDT_WRITE_LIM.Commit;
-        end else
-         raise Exception.Create('Ошибка при добавлении записи');
-        except
-          on E: Exception do
-          begin
-            if FDT_WRITE_LIM.Active then FDT_WRITE_LIM.Rollback;
-            FDQ_LIM.CancelUpdates;
-            FDQ_LIM.Refresh;
-            Application.ShowException(E);
-          end;
-        end;
-    end;
+  //вносим изменения в таблицу
+  AfterPost(FDQ_LIM,FDT_WRITE_LIM);
 end;
 
 procedure TfmLimits.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -143,30 +121,8 @@ begin
     LDocument.SaveToFile(extractfilepath(application.ExeName)+'Setup.xml');
     LDocument.Active:=false;
 
-    if FDQ_LIM.UpdatesPending then
-      begin
-       //старт транзакции на запись
-        FDT_WRITE_LIM.StartTransaction;
-       //применяем изменения
-       try
-        if (FDQ_LIM.ApplyUpdates = 0) then
-        begin
-         //очищаем журнал
-         FDQ_LIM.CommitUpdates;
-         //завершаем транзакцию
-         FDT_WRITE_LIM.Commit;
-        end else
-         raise Exception.Create('Ошибка при добавлении записи');
-        except
-          on E: Exception do
-          begin
-            if FDT_WRITE_LIM.Active then FDT_WRITE_LIM.Rollback;
-            FDQ_LIM.CancelUpdates;
-            FDQ_LIM.Refresh;
-            Application.ShowException(E);
-          end;
-        end;
-    end;
+    //вносим изменения в таблицу
+    AfterPost(FDQ_LIM,FDT_WRITE_LIM);
     // закрываем набор данных
     FDQ_LIM.Close;
   finally

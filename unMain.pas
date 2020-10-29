@@ -290,6 +290,7 @@ var
  procedure CreateFileDir(var file_name, file_path:String; var put: byte);
  procedure BackupDB;
  procedure RestoreDB;
+ procedure AfterPost(query: TFDQuery; trans: TFDTransaction);
 
 implementation
 
@@ -381,6 +382,35 @@ begin
                              fmMain.FDQ_DIR.FieldByName('Code').AsString+' '+
                              fmMain.FDQ_DIR.FieldByName('FName').AsString;
    if not DirectoryExists(file_path) then  CreateDir(file_path);
+end;
+
+//записать данные в таблицу
+procedure AfterPost(query: TFDQuery; trans: TFDTransaction);
+begin
+   if query.UpdatesPending then
+      begin
+       //старт транзакции на запись
+        trans.StartTransaction;
+       //применяем изменения
+       try
+        if (query.ApplyUpdates = 0) then
+        begin
+         //очищаем журнал
+         query.CommitUpdates;
+         //завершаем транзакцию
+         trans.Commit;
+        end else
+         raise Exception.Create('Ошибка при добавлении записи');
+        except
+          on E: Exception do
+          begin
+            if trans.Active then trans.Rollback;
+            query.CancelUpdates;
+            query.Refresh;
+            Application.ShowException(E);
+          end;
+        end;
+    end;
 end;
 
 //резервная копия БД
@@ -1095,17 +1125,21 @@ begin
       fmTimeTable.Height:=TTSettings.Height;
       fmTimeTable.Left:=TTSettings.Left;
       fmTimeTable.Top:=TTSettings.Top;
+      //открываем набор данных
+      fmTimeTable.FDQ_TR.Open;
     end;
    // else fmTimeTable.BringToFront;
   end else fmTimeTable.Close;
 
- if ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
- ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=0)) then Way:=2 else Way:=1;
+  (*
+   if ((fmMain.IBDS_DirectionsWAY.Value=2)  and (fmMain.IBDS_DirectionsFLAG.Value=1)) or
+    ((fmMain.IBDS_DirectionsWAY.Value=1)  and (fmMain.IBDS_DirectionsFLAG.Value=0)) then Way:=2 else Way:=1;
 
- if Way=2 then fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD' else
-               fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD DESC';
- DS_Refresh(IBDS_TIME_TABLE);
- DS_Refresh(IBDS_Trains);
+    if Way=2 then fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD' else
+                  fmMain.IBDS_TIME_TABLE.SelectSQL.Strings[fmMain.IBDS_TIME_TABLE.SelectSQL.count-1]:='ORDER BY S.KOORD DESC';
+
+ *) //DS_Refresh(IBDS_TIME_TABLE);
+// DS_Refresh(IBDS_Trains);
 end;
 
 procedure TfmMain.tbLimitsClick(Sender: TObject);
@@ -1137,7 +1171,6 @@ begin
       fmPrep.Left:=ObjSettings.Left;
       fmPrep.Top:=ObjSettings.Top;
     end;
-//  else fmPrep.BringToFront;
   end else fmPrep.Close;
 end;
 

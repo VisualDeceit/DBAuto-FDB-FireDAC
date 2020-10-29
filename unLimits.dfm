@@ -227,6 +227,7 @@ object fmLimits: TfmLimits
     end
     object ImportFromXLS: TMenuItem
       Caption = #1048#1084#1087#1086#1088#1090' '#1076#1072#1085#1085#1099#1093' '#1080#1079' '#1092#1072#1081#1083#1072' *.xls'
+      Visible = False
       OnClick = ImportFromXLSClick
     end
   end
@@ -241,6 +242,7 @@ object fmLimits: TfmLimits
     Top = 184
   end
   object FDQ_LIM: TFDQuery
+    Active = True
     AfterPost = FDQ_LIMAfterPost
     CachedUpdates = True
     MasterSource = fmMain.DS_DIR
@@ -252,7 +254,7 @@ object fmLimits: TfmLimits
     FetchOptions.Items = [fiBlobs, fiDetails]
     UpdateOptions.AssignedValues = [uvEDelete, uvEInsert, uvEUpdate, uvUpdateChngFields, uvFetchGeneratorsPoint, uvGeneratorName, uvCheckRequired]
     UpdateOptions.FetchGeneratorsPoint = gpNone
-    UpdateOptions.GeneratorName = 'GEN_LIGHT_SIGNALS_ID'
+    UpdateOptions.GeneratorName = 'GEN_LIMITS_ID'
     UpdateOptions.AutoIncFields = 'ID'
     UpdateObject = FDUSQL_LIM
     SQL.Strings = (
@@ -286,6 +288,7 @@ object fmLimits: TfmLimits
         Name = 'ID'
         DataType = ftInteger
         ParamType = ptInput
+        Value = Null
       end>
     object FDQ_LIMID: TFDAutoIncField
       FieldName = 'ID'
@@ -365,36 +368,52 @@ object fmLimits: TfmLimits
   object FDUSQL_LIM: TFDUpdateSQL
     Connection = fmMain.FDC_Base
     InsertSQL.Strings = (
-      'insert into Limits'
+      'INSERT INTO LIMITS'
       
-        '  (BEG_KM, BEG_PK, END_KM, END_PK, SPEED, NOTE, DIR_KEY, SHIFT_K' +
+        '(DIR_KEY, BEG_KM, BEG_PK, END_KM, END_PK,  SPEED, NOTE,  SHIFT_K' +
         'EY)'
-      'values'
       
-        '  (:BEG_KM, :BEG_PK, :END_KM, :END_PK, :SPEED, :NOTE, :DIR_KEY, ' +
-        ':SHIFT_KEY)')
+        'VALUES (:ID, :NEW_BEG_KM, :NEW_BEG_PK, :NEW_END_KM, :NEW_END_PK,' +
+        ' '
+      '  :NEW_SPEED, :NEW_NOTE, :NEW_SHIFT_KEY)')
     ModifySQL.Strings = (
-      'update Limits'
-      'set'
-      '  BEG_KM = :BEG_KM,'
-      '  BEG_PK = :BEG_PK,'
-      '  END_KM = :END_KM,'
-      '  END_PK = :END_PK,'
-      '  SPEED = :SPEED,'
-      '  NOTE = :NOTE,'
-      '  DIR_KEY = :DIR_KEY,'
-      '  SHIFT_KEY = :SHIFT_KEY'
-      'where'
-      '  ID = :OLD_ID')
+      'UPDATE LIMITS'
+      
+        'SET ID = :NEW_ID, BEG_KM = :NEW_BEG_KM, BEG_PK = :NEW_BEG_PK, EN' +
+        'D_KM = :NEW_END_KM, '
+      '  END_PK = :NEW_END_PK, SPEED = :NEW_SPEED, NOTE = :NEW_NOTE, '
+      '  DIR_KEY = :NEW_DIR_KEY, SHIFT_KEY = :NEW_SHIFT_KEY'
+      
+        'WHERE ID = :OLD_ID AND BEG_KM = :OLD_BEG_KM AND BEG_PK = :OLD_BE' +
+        'G_PK AND '
+      
+        '  END_KM = :OLD_END_KM AND END_PK = :OLD_END_PK AND SPEED = :OLD' +
+        '_SPEED AND '
+      
+        '  NOTE = :OLD_NOTE AND DIR_KEY = :OLD_DIR_KEY AND SHIFT_KEY = :O' +
+        'LD_SHIFT_KEY'
+      'RETURNING ID')
     DeleteSQL.Strings = (
-      'delete from Limits'
-      'where'
-      '  ID = :OLD_ID')
+      'DELETE FROM LIMITS'
+      
+        'WHERE ID = :OLD_ID AND BEG_KM = :OLD_BEG_KM AND BEG_PK = :OLD_BE' +
+        'G_PK AND '
+      
+        '  END_KM = :OLD_END_KM AND END_PK = :OLD_END_PK AND SPEED = :OLD' +
+        '_SPEED AND '
+      
+        '  NOTE = :OLD_NOTE AND DIR_KEY = :OLD_DIR_KEY AND SHIFT_KEY = :O' +
+        'LD_SHIFT_KEY')
     FetchRowSQL.Strings = (
-      'Select '
-      'from Limits '
-      'where'
-      '  ID = :ID')
+      
+        'SELECT ID, BEG_KM, BEG_PK, END_KM, END_PK, SPEED, NOTE, DIR_KEY,' +
+        ' SHIFT_KEY'
+      'FROM LIMITS'
+      
+        'WHERE ID = :ID AND BEG_KM = :BEG_KM AND BEG_PK = :BEG_PK AND END' +
+        '_KM = :END_KM AND '
+      '  END_PK = :END_PK AND SPEED = :SPEED AND NOTE = :NOTE AND '
+      '  DIR_KEY = :DIR_KEY AND SHIFT_KEY = :SHIFT_KEY')
     Left = 468
     Top = 184
   end

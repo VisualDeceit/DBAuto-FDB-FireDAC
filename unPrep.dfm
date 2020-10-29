@@ -3,7 +3,7 @@ object fmPrep: TfmPrep
   Top = 170
   Caption = #1054#1073#1098#1077#1082#1090#1099' '#1087#1091#1090#1080
   ClientHeight = 753
-  ClientWidth = 336
+  ClientWidth = 368
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,7 +21,7 @@ object fmPrep: TfmPrep
   object ToolBar3: TToolBar
     Left = 0
     Top = 0
-    Width = 336
+    Width = 368
     Height = 38
     AutoSize = True
     ButtonHeight = 38
@@ -33,6 +33,7 @@ object fmPrep: TfmPrep
     Images = fmMain.ImageList1
     ParentColor = False
     TabOrder = 0
+    ExplicitWidth = 877
     object ToolButton5: TToolButton
       Left = 0
       Top = 0
@@ -74,9 +75,9 @@ object fmPrep: TfmPrep
   end
   object DBG_Prep: TDBGridEh
     Left = 0
-    Top = 38
-    Width = 336
-    Height = 715
+    Top = 96
+    Width = 368
+    Height = 657
     Align = alClient
     AutoFitColWidths = True
     ColumnDefValues.AlwaysShowEditButton = True
@@ -108,6 +109,7 @@ object fmPrep: TfmPrep
     OnDrawColumnCell = DBG_PrepDrawColumnCell
     Columns = <
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'ID'
@@ -115,6 +117,7 @@ object fmPrep: TfmPrep
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'DIR_KEY'
@@ -122,6 +125,7 @@ object fmPrep: TfmPrep
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'OBJ_KEY'
@@ -129,6 +133,7 @@ object fmPrep: TfmPrep
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'OBJ_NAME'
@@ -138,6 +143,7 @@ object fmPrep: TfmPrep
         Width = 151
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'KOORD'
@@ -146,6 +152,7 @@ object fmPrep: TfmPrep
         Width = 135
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'SHIFT_KEY'
@@ -153,6 +160,7 @@ object fmPrep: TfmPrep
         Visible = False
       end
       item
+        CellButtons = <>
         DynProps = <>
         EditButtons = <>
         FieldName = 'LIN_KOORD'
@@ -161,6 +169,23 @@ object fmPrep: TfmPrep
       end>
     object RowDetailData: TRowDetailPanelControlEh
     end
+  end
+  object DBNavigator1: TDBNavigator
+    AlignWithMargins = True
+    Left = 1
+    Top = 48
+    Width = 366
+    Height = 38
+    Margins.Left = 1
+    Margins.Top = 10
+    Margins.Right = 1
+    Margins.Bottom = 10
+    Align = alTop
+    ConfirmDelete = False
+    TabOrder = 2
+    ExplicitLeft = -4
+    ExplicitTop = 66
+    ExplicitWidth = 875
   end
   object pmPrep: TPopupMenu
     Left = 96

@@ -6003,7 +6003,7 @@ object fmMain: TfmMain
     BufferChunks = 1000
     CachedUpdates = False
     ParamCheck = True
-    Left = 232
+    Left = 248
     Top = 72
     ParamData = <
       item
@@ -6028,7 +6028,7 @@ object fmMain: TfmMain
     UpdateObject = IBUPD_Trains
     DataSource = dsDirections
     Left = 416
-    Top = 232
+    Top = 152
     object IBDS_TrainsID: TIntegerField
       FieldName = 'ID'
       Origin = '"TRAINS"."ID"'
@@ -6044,8 +6044,8 @@ object fmMain: TfmMain
   end
   object dsTrains: TDataSource
     DataSet = IBDS_Trains
-    Left = 496
-    Top = 144
+    Left = 464
+    Top = 72
   end
   object IBDS_TIME_TABLE: TIBDataSet
     Database = IBDB_Main
@@ -6104,8 +6104,8 @@ object fmMain: TfmMain
   end
   object dsTime_Table: TDataSource
     DataSet = IBDS_TIME_TABLE
-    Left = 576
-    Top = 144
+    Left = 512
+    Top = 72
   end
   object IBQR_TEMP2: TIBQuery
     Database = IBDB_Main
@@ -6282,8 +6282,8 @@ object fmMain: TfmMain
   end
   object dsObjects: TDataSource
     DataSet = IBDS_Objects
-    Left = 664
-    Top = 144
+    Left = 560
+    Top = 72
   end
   object IBDS_OBJECTS_INFO: TIBDataSet
     Database = IBDB_Main
@@ -6295,7 +6295,7 @@ object fmMain: TfmMain
       'FROM OBJECTS_INFO')
     ParamCheck = True
     UniDirectional = False
-    Left = 648
+    Left = 600
     Top = 232
     object IBDS_OBJECTS_INFOID: TIntegerField
       FieldName = 'ID'
@@ -6317,8 +6317,8 @@ object fmMain: TfmMain
   end
   object dsObjects_Info: TDataSource
     DataSet = IBDS_OBJECTS_INFO
-    Left = 760
-    Top = 144
+    Left = 608
+    Top = 72
   end
   object IBUPD_Directions: TIBUpdateSQLW
     RefreshSQL.Strings = (
@@ -6420,8 +6420,8 @@ object fmMain: TfmMain
       '  ID = :OLD_ID')
     AutoCommit = True
     UpdateTransaction = IBTR_WRITE
-    Left = 488
-    Top = 416
+    Left = 432
+    Top = 424
   end
   object IBUPD_Time_Table: TIBUpdateSQLW
     RefreshSQL.Strings = (
@@ -6450,8 +6450,8 @@ object fmMain: TfmMain
       '  ID = :OLD_ID')
     AutoCommit = True
     UpdateTransaction = IBTR_WRITE
-    Left = 592
-    Top = 408
+    Left = 528
+    Top = 416
   end
   object IBUPD_Objects: TIBUpdateSQLW
     RefreshSQL.Strings = (
@@ -6479,8 +6479,8 @@ object fmMain: TfmMain
       '  ID = :OLD_ID')
     AutoCommit = True
     UpdateTransaction = IBTR_WRITE
-    Left = 680
-    Top = 408
+    Left = 568
+    Top = 416
   end
   object TrayIcon1: TTrayIcon
     BalloonTimeout = 1000
@@ -6502,7 +6502,7 @@ object fmMain: TfmMain
     UniDirectional = False
     UpdateObject = IBUPD_PROF
     DataSource = dsDirections
-    Left = 752
+    Left = 640
     Top = 232
     object IBDS_profID: TIntegerField
       FieldName = 'ID'
@@ -6550,13 +6550,13 @@ object fmMain: TfmMain
       '  ID = :OLD_ID')
     AutoCommit = True
     UpdateTransaction = IBTR_WRITE
-    Left = 792
-    Top = 408
+    Left = 608
+    Top = 416
   end
   object ds_Prof: TDataSource
     DataSet = IBDS_prof
-    Left = 848
-    Top = 144
+    Left = 648
+    Top = 72
   end
   object PopupMenu1: TPopupMenu
     Left = 400

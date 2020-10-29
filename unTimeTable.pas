@@ -6,7 +6,10 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, DB, ExtCtrls, DBCtrls, DBGrids, DBTables, StdCtrls, Menus,
   DBGridEhGrouping, GridsEh, DBGridEh,ShellAPI, ImgList, ComCtrls, ToolWin,EhLibIBX,
-  ToolCtrlsEh, DBGridEhToolCtrls, DynVarsEh, EhLibVCL, DBAxisGridsEh, XMLIntf, XMLDoc;
+  ToolCtrlsEh, DBGridEhToolCtrls, DynVarsEh, EhLibVCL, DBAxisGridsEh, XMLIntf, XMLDoc,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.Client, FireDAC.Comp.DataSet;
 
 type
   TfmTimeTable = class(TForm)
@@ -34,6 +37,12 @@ type
     pmImport: TPopupMenu;
     DB1: TMenuItem;
     N2: TMenuItem;
+    DBNavigator1: TDBNavigator;
+    DS_TR: TDataSource;
+    FDQ_TR: TFDQuery;
+    FDUSQL_TR: TFDUpdateSQL;
+    FDT_WRITE_TR: TFDTransaction;
+    FDCmd: TFDCommand;
     procedure N1Click(Sender: TObject);
     procedure DBG_TimeTableDrawColumnCell(Sender: TObject;
       const Rect: TRect; DataCol: Integer; Column: TColumnEh;
@@ -52,6 +61,7 @@ type
     procedure DBG_TrainNoDrawColumnCell(Sender: TObject; const Rect: TRect;
       DataCol: Integer; Column: TColumnEh; State: TGridDrawState);
     procedure DB1Click(Sender: TObject);
+    procedure FDQ_TRAfterPost(DataSet: TDataSet);
   private
     { Private declarations }
   public
@@ -178,6 +188,12 @@ begin
  end;
 end;
 
+procedure TfmTimeTable.FDQ_TRAfterPost(DataSet: TDataSet);
+begin
+  //вносим изменения в таблицу
+  AfterPost(FDQ_TR,FDT_WRITE_TR);
+end;
+
 procedure TfmTimeTable.FormClose(Sender: TObject;
   var Action: TCloseAction);
 var
@@ -204,13 +220,16 @@ begin
 
     LDocument.SaveToFile(extractfilepath(application.ExeName)+'Setup.xml');
     LDocument.Active:=false;
+
+    //вносим изменения в таблицу
+    AfterPost(FDQ_TR,FDT_WRITE_TR);
+    // закрываем набор данных
+    FDQ_TR.Close;
   finally
 
   end;
  Action:=caFree;
  fmMain.tbTimetable.Down:=False;
- if  fmMain.IBDS_Trains.State in [dsEdit] then  fmMain.IBDS_Trains.Post;
- if  fmMain.IBDS_TIME_TABLE.State in [dsEdit] then  fmMain.IBDS_TIME_TABLE.Post;
 end;
 
 procedure TfmTimeTable.MenuItem1Click(Sender: TObject);

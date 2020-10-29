@@ -20,18 +20,19 @@ object fmTimeTable: TfmTimeTable
   TextHeight = 14
   object Splitter1: TSplitter
     Left = 233
-    Top = 38
-    Height = 715
+    Top = 83
+    Height = 670
+    ExplicitTop = 38
     ExplicitHeight = 771
   end
   object DBG_TrainNo: TDBGridEh
     Left = 0
-    Top = 38
+    Top = 83
     Width = 233
-    Height = 715
+    Height = 670
     Align = alLeft
     AutoFitColWidths = True
-    DataSource = fmMain.dsTrains
+    DataSource = DS_TR
     DefaultDrawing = False
     DynProps = <>
     Flat = True
@@ -83,9 +84,9 @@ object fmTimeTable: TfmTimeTable
   end
   object DBG_TimeTable: TDBGridEh
     Left = 236
-    Top = 38
+    Top = 83
     Width = 551
-    Height = 715
+    Height = 670
     Align = alClient
     AutoFitColWidths = True
     ColumnDefValues.AlwaysShowEditButton = True
@@ -245,9 +246,25 @@ object fmTimeTable: TfmTimeTable
       ShowHint = True
     end
   end
+  object DBNavigator1: TDBNavigator
+    AlignWithMargins = True
+    Left = 1
+    Top = 48
+    Width = 785
+    Height = 25
+    Margins.Left = 1
+    Margins.Top = 10
+    Margins.Right = 1
+    Margins.Bottom = 10
+    Align = alTop
+    ConfirmDelete = False
+    TabOrder = 3
+    ExplicitLeft = -25
+    ExplicitWidth = 812
+  end
   object pmTrainEdit: TPopupMenu
-    Left = 176
-    Top = 182
+    Left = 160
+    Top = 118
     object N8: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -349,8 +366,8 @@ object fmTimeTable: TfmTimeTable
   end
   object pmTrainCopy: TPopupMenu
     TrackButton = tbLeftButton
-    Left = 56
-    Top = 166
+    Left = 96
+    Top = 118
     object N4: TMenuItem
       Caption = #1050#1086#1087#1080#1088#1086#1074#1072#1090#1100
       OnClick = N4Click
@@ -361,8 +378,8 @@ object fmTimeTable: TfmTimeTable
     end
   end
   object pmTrainCreate: TPopupMenu
-    Left = 8
-    Top = 102
+    Left = 24
+    Top = 118
     object N6: TMenuItem
       Caption = #1057#1086#1079#1076#1072#1090#1100' '#1092#1072#1081#1083
       OnClick = N6Click
@@ -373,8 +390,8 @@ object fmTimeTable: TfmTimeTable
     end
   end
   object pmTimeTableEdit: TPopupMenu
-    Left = 280
-    Top = 132
+    Left = 344
+    Top = 164
     object MenuItem1: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -441,8 +458,8 @@ object fmTimeTable: TfmTimeTable
     end
   end
   object pmImport: TPopupMenu
-    Left = 112
-    Top = 104
+    Left = 280
+    Top = 160
     object DB1: TMenuItem
       Caption = #1074#1088#1077#1084#1103' '#1080#1079' *.db'
       OnClick = N1Click
@@ -451,5 +468,87 @@ object fmTimeTable: TfmTimeTable
       Caption = #1089#1087#1080#1089#1086#1082' '#1089#1090#1072#1085#1094#1080#1081
       OnClick = DB1Click
     end
+  end
+  object DS_TR: TDataSource
+    DataSet = FDQ_TR
+    Left = 32
+    Top = 280
+  end
+  object FDQ_TR: TFDQuery
+    AfterPost = FDQ_TRAfterPost
+    CachedUpdates = True
+    MasterSource = fmMain.DS_DIR
+    MasterFields = 'ID'
+    Connection = fmMain.FDC_Base
+    Transaction = fmMain.FDT_READ
+    UpdateTransaction = FDT_WRITE_TR
+    FetchOptions.AssignedValues = [evItems]
+    FetchOptions.Items = [fiBlobs, fiDetails]
+    UpdateOptions.AssignedValues = [uvEDelete, uvEInsert, uvEUpdate, uvUpdateChngFields, uvFetchGeneratorsPoint, uvGeneratorName, uvCheckRequired]
+    UpdateOptions.FetchGeneratorsPoint = gpNone
+    UpdateOptions.GeneratorName = 'GEN_LIGHT_SIGNALS_ID'
+    UpdateOptions.AutoIncFields = 'ID'
+    UpdateObject = FDUSQL_TR
+    SQL.Strings = (
+      'SELECT * '
+      'FROM TRAINS'
+      'WHERE DIR_KEY= :ID'
+      'ORDER BY NUMBER')
+    Left = 88
+    Top = 280
+    ParamData = <
+      item
+        Name = 'ID'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = Null
+      end>
+  end
+  object FDUSQL_TR: TFDUpdateSQL
+    Connection = fmMain.FDC_Base
+    InsertSQL.Strings = (
+      'insert into TRAINS'
+      '  (DIR_KEY, NUMBER)'
+      'values'
+      '  (:DIR_KEY, :NUMBER)')
+    ModifySQL.Strings = (
+      'update TRAINS'
+      'set'
+      '  DIR_KEY = :DIR_KEY,'
+      '  NUMBER = :NUMBER'
+      'where'
+      '  ID = :OLD_ID')
+    DeleteSQL.Strings = (
+      'delete from TRAINS'
+      'where'
+      '  ID = :OLD_ID')
+    FetchRowSQL.Strings = (
+      'Select '
+      '  ID,'
+      '  DIR_KEY,'
+      '  NUMBER'
+      'from TRAINS '
+      'where'
+      '  ID = :ID')
+    Left = 84
+    Top = 416
+  end
+  object FDT_WRITE_TR: TFDTransaction
+    Options.Isolation = xiSnapshot
+    Options.AutoStart = False
+    Options.AutoStop = False
+    Options.DisconnectAction = xdRollback
+    Connection = fmMain.FDC_Base
+    Left = 87
+    Top = 352
+  end
+  object FDCmd: TFDCommand
+    Connection = fmMain.FDC_Base
+    Transaction = FDT_WRITE_TR
+    FetchOptions.AssignedValues = [evItems]
+    FetchOptions.Items = [fiBlobs, fiDetails]
+    UpdateOptions.AssignedValues = [uvEDelete, uvEInsert, uvEUpdate]
+    Left = 396
+    Top = 312
   end
 end

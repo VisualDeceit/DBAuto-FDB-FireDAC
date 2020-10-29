@@ -20,6 +20,7 @@ type
     MenuItem4: TMenuItem;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
+    DBNavigator1: TDBNavigator;
     procedure DBG_PrepDrawColumnCell(Sender: TObject; const Rect: TRect;
       DataCol: Integer; Column: TColumnEh; State: TGridDrawState);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
